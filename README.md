@@ -1,3 +1,5 @@
+What the
+-------
 I've recently moved to Raleigh and discovered that living in a place people may actually mention on a webpage is a lot more fun and informative than the alternative.
 
 Reading a ZDnet article last night about Google constraining license proliferation on Google Code (Saturday night's all right for fighting!) I happened to notice at the end that the author, Ed Burnett, wrote a book named "Hello Android". I had just seen an email to my local Android dev meetup group about that book, and, going back to read it, sure enough, same guy. He's local to me. That's kinda cool. About 30 minutes later I'm reading something on Hacker News and someone mentions Raleigh, and I'm thinking... It sure would be useful to know when a webpage contained content about my area, without me having to do a manual find on each page that looked likely. Situations of the former fuzzily associative variety I can't do much about yet, but explicit mentions of geographical regions, easy enough.
