@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+<script>
+
+function save() {
+  var searchable = document.getElementById("searchable").value;
+  window.localStorage.setItem("searchable", searchable);
+}
+
+// Make sure the checkbox checked state gets properly initialized from the
+// saved preference.
+window.onload = function() {
+  var searchable = window.localStorage.getItem(searchable) || "sandwich|more_sandwich";
+  document.getElementById("searchable").value = searchable;
+}
+
+</script>
+
+<style type="text/css">
+.slash {
+  margin: 0.2em;
+  font-size: 140%;
+  font-weight: 800;
+}
+
+.form {
+   margin: 1em;
+}
+
+#searchable {
+  display:inline; 
+  width:30em; 
+  border: none; 
+  border-bottom: 1px solid #999;
+}
+
+.example {
+   background-color: #FFE303;
+   font-weight: 800;
+   display: inline-block;
+   padding: 0 1em;
+}
+
+</style>
+
+</head>
+<body>
+<h2>Search pages for terms</h2>
+
+<br>
+Search all pages for the following javascript-compatible regex: 
+<br>
+
+<div class="form">
+  <span class="slash">/</span>
+  <input id="searchable" type="text"/>
+  <span class="slash">/gi</span>
+</div>
+
+<br>
+
+<input type="button" onClick="save()" value="Save">
+
+<br>
+<br>
+
+<strong>Example</strong>:<br>
+Inputting...
+<span class="example"><pre>raleigh|research|triangle|rtp</pre></span>
+will search pages with the following regex: 
+<span class="example"><pre>/raleigh|research|triangle|rtp/gi</pre></span>
+
+<br>
+<br>
+</body>
+</html>

@@ -1,8 +1,9 @@
 {
-  "name" : "SandwichBar",
+  "name" : "Regex Scanner",
   "version" : "1.0.0",
-  "description" : "Shows an infobar on pages which contain the word 'sandwich'",
+  "description" : "Shows an infobar on pages which contain a provided regex",
   "background_page" : "background.html",
+  "options_page": "options.html",
   "permissions" : [ "experimental" ],
   "icons" : {
     "16" : "sandwich-16.png",

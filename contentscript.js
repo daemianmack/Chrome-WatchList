@@ -3,11 +3,19 @@
  * source code is governed by a BSD-style license that can be found in the
  * LICENSE file.
  */
-var regex = /sandwich/gi;
-matches = document.body.innerText.match(regex);
-if (matches) {
-  var payload = {
-    count: matches.length    // Pass the number of matches back.
-  };
-  chrome.extension.sendRequest(payload, function(response) {});
-}
+
+chrome.extension.sendRequest({method: "getSearchable"}, function(response) {
+    var searchable = response.searchable;
+    console.log('outside');
+    if (typeof searchable !== "undefined") {
+        console.log('inside');
+      var regex = new RegExp(searchable, "gi");
+      matches = document.body.innerText.match(regex);
+      if (matches) {
+        var payload = {
+          count: matches.length    // Pass the number of matches back.
+        };
+        chrome.extension.sendRequest(payload, function(response) {});
+      }
+    }
+});
