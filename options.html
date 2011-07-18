@@ -5,13 +5,13 @@
 
 function save() {
   var searchable = document.getElementById("searchable").value;
-  window.localStorage.setItem("searchable", searchable);
+  window.localStorage["searchable"] = searchable;
 }
 
 // Make sure the checkbox checked state gets properly initialized from the
 // saved preference.
 window.onload = function() {
-  var searchable = window.localStorage.getItem(searchable) || "sandwich|more_sandwich";
+  var searchable = window.localStorage["searchable"] || "sandwich|more_sandwich";
   document.getElementById("searchable").value = searchable;
 }
 
