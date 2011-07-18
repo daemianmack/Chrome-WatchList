@@ -6,9 +6,7 @@
 
 chrome.extension.sendRequest({method: "getSearchable"}, function(response) {
     var searchable = response.searchable;
-    console.log('outside');
     if (typeof searchable !== "undefined") {
-        console.log('inside');
       var regex = new RegExp(searchable, "gi");
       matches = document.body.innerText.match(regex);
       if (matches) {
