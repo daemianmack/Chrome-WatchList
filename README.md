@@ -10,6 +10,17 @@ That's what this is. It uses localStorage so your chosen regex is persistent.
 
 I've left the original Sandwichbar code in as initial commit so you can see how trivial Chrome extensions are.
 
+INSTALL
+-------
+1. Wrench thingy > Tools > Extensions. 
+2. Hit "Load unpacked extension..." which you'll only see if you're in developer mode. 
+3. Browse to the downloaded git repo and select it. Click OK. 
+4. Fiddle with the options.
+5. Rejoice in a life *finally* worth living.
+
+NOTA BENE
+---------
+Requires you launch Chrome with the --enable-experimental-extension-apis switch.
 
 TODO
 ----
