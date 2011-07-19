@@ -22,6 +22,10 @@ NOTA BENE
 ---------
 Requires you launch Chrome with the --enable-experimental-extension-apis switch.
 
+BUGS
+----
+Infobar is perhaps a bit *too* experimental -- it's pretty crashy, especially at tab-switch time. I need to replace it with something more stable. I'm not keen on having to launch with particular command-line flags anyway.
+
 TODO
 ----
 1. Domain blacklist to cut down on positives we don't care about.
