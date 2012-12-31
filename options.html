@@ -1,28 +1,13 @@
 <!doctype html>
 <html>
 <head>
-<script>
-
-function save() {
-  var searchable = document.getElementById("searchable").value;
-  window.localStorage["searchable"] = searchable;
-}
-
-// Make sure the checkbox checked state gets properly initialized from the
-// saved preference.
-window.onload = function() {
-  var searchable = window.localStorage["searchable"] || "sandwich|more_sandwich";
-  document.getElementById("searchable").value = searchable;
-}
-
-</script>
 
 <style type="text/css">
   .form {
      margin: 1em;
   }
 
-  #searchable {
+  #watchlist_term_input {
     background-color:#eef;
     display:inline;
     width:30em;
@@ -30,42 +15,39 @@ window.onload = function() {
     border-bottom: 1px dashed #999;
   }
 
+  #status {
+      color: #333;
+      margin-left: 1em;
+  }
+
   .example {
      background-color: #FFE303;
-     font-weight: 800;
      display: inline-block;
-     padding: 0 1em;
+     font-family: monospace;
+     padding: .6em 1em;
   }
+  .example-term {
+     font-weight: 800;
+}
 </style>
 
 </head>
+
+<script src="options.js"></script>
+
 <body>
-<h2>Search pages for terms</h2>
+<h2>Populate WatchList</h2>
 
 <br>
-Search all pages for the following javascript-compatible regex: 
+Search all pages for the following javascript-compatible regex:
 <br>
 
 <div class="form">
   /
-  <input id="searchable" type="text"/>
+  <input id="watchlist_term_input" type="text" placeholder="sandwich|more_sandwich" />
   /gi
+  <input id="save" type="button" value="Save"><span id="status"></span>
 </div>
 
-<br>
-
-<input type="button" onClick="save()" value="Save">
-
-<br>
-<br>
-
-<strong>Example</strong>:<br>
-Inputting...
-<span class="example"><pre>raleigh|research|triangle|rtp</pre></span>
-will search pages with the following regex: 
-<span class="example"><pre>/raleigh|research|triangle|rtp/gi</pre></span>
-
-<br>
-<br>
 </body>
 </html>

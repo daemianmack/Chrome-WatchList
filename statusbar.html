@@ -1,0 +1,41 @@
+<html>
+  <body>
+    <style type="text/css">
+      #watchlist-status-bar {
+          height: 18px;
+          background-color: #ebebeb;
+          border-top: 1px solid silver;
+          border-left: 1px solid silver;
+          color: black;
+          position: fixed;
+          bottom: 0;
+          right: 0;
+          z-index: 25000;
+          text-align: right;
+      }
+      .watchlist-status-bar-item {
+          padding: 0 10px 0 10px;
+          line-height: 18px;
+          font-family: verdana;
+          font-size: 10pt;
+      }
+      .watchlist-status-bar-item a {
+          text-decoration: none;
+          color: black;
+      }
+      .watchlist-status-bar-separator {
+          border-left: 1px solid silver;
+          border-right: 1px solid silver;
+          margin: 0 1px;
+          display: inline-block;
+          width: 1px;
+          height: 10px;
+      }
+    </style>
+    <div id='watchlist-status-bar'>
+      <span class='watchlist-status-bar-item'><a href='http://www.daemianmack.com'>WatchList</a></span>
+      <span class='watchlist-status-bar-separator'></span>
+      <span class='watchlist-status-bar-item' id='watchlist-results'>...</span>
+    </div>
+  </body>
+</html>

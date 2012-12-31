@@ -1,21 +1,25 @@
 {
-  "name" : "Regex Scanner",
-  "version" : "1.0.0",
-  "description" : "Shows an infobar on pages which contain a provided regex",
-  "background_page" : "background.html",
-  "options_page": "options.html",
-  "permissions" : [ "experimental" ],
-  "icons" : {
-    "16" : "sandwich-16.png",
-    "48" : "sandwich-48.png",
-    "128" : "sandwich-128.png"
-  },
-  "content_scripts" : [
-    {
-      "matches" : [ "http://*/*" ],
-      "js" : [ "contentscript.js" ],
-      "run_at" : "document_idle",
-      "all_frames" : false
-    }
-  ]
+	"name": "WatchList",
+	"version": "0.1",
+        "manifest_version": 2,
+	"description": "Notifies you when the current page contains words of your choosing.",
+        "permissions": [
+            "storage"
+         ],
+        "web_accessible_resources": [
+                "statusbar.html"
+        ],
+	"content_scripts": [
+	{
+                "matches": ["http://*/*", "https://*/*"],
+		"js": ["jq.js", "main.js", "options.js"],
+                "css": ["matches.css"],
+		"run_at": "document_idle"
+	}
+	],
+        "options_page": "options.html",
+	"icons": {
+		"48": "icon48.png",
+		"128": "icon128.png"
+	}
 }
