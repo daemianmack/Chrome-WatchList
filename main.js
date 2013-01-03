@@ -5,7 +5,7 @@ function highlight(els, str, className) {
         $(el).contents().filter(function(__, el_) {
             // Noscript tag contents present as text and behave
             // poorly; e.g. Google results for terms that happen to be watchlisted.
-            return el_.nodeType == 3 && regex.test(el_.nodeValue) && $(el_).parent("noscript").length == 0;
+            return el_.nodeType == 3 && regex.test(el_.nodeValue) && $(el_).parent("noscript, textarea").length == 0;
         }).replaceWith(function() {
             return (this.nodeValue || "").replace(regex, function(match) {
                 key = match.toLowerCase();
