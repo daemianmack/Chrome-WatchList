@@ -15,8 +15,8 @@ function save_options() {
 
 function retrieve_options() {
     chrome.storage.local.get('watchlist_terms', function(data) {
-        if (data.watchlist) {
-            document.getElementById('watchlist_term_input').value = data.watchlist;
+        if (data.watchlist_terms) {
+            document.getElementById('watchlist_term_input').value = data.watchlist_terms;
         }
     });
 }
