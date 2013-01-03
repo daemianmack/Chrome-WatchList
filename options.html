@@ -1,53 +1,51 @@
 <!doctype html>
 <html>
-<head>
+  <head>
 
-<style type="text/css">
-  .form {
-     margin: 1em;
-  }
+    <style type="text/css">
+      .form {
+          margin: 1em;
+      }
 
-  #watchlist_term_input {
-    background-color:#eef;
-    display:inline;
-    width:30em;
-    border: none;
-    border-bottom: 1px dashed #999;
-  }
+      #watchlist_term_input {
+          background-color:#eef;
+          display:inline;
+          width:30em;
+          border: none;
+          border-bottom: 1px dashed #999;
+      }
 
-  #status {
-      color: #333;
-      margin-left: 1em;
-  }
+      #status {
+          color: #333;
+          margin-left: 1em;
+      }
 
-  .example {
-     background-color: #FFE303;
-     display: inline-block;
-     font-family: monospace;
-     padding: .6em 1em;
-  }
-  .example-term {
-     font-weight: 800;
-}
-</style>
+      .example {
+          background-color: #FFE303;
+          display: inline-block;
+          font-family: monospace;
+          padding: .6em 1em;
+      }
+      .example-term {
+          font-weight: 800;
+      }
+    </style>
 
-</head>
+  </head>
 
-<script src="options.js"></script>
+  <script src="options.js"></script>
 
-<body>
-<h2>Populate WatchList</h2>
+  <body>
+    <h2>Populate WatchList</h2>
 
-<br>
-Search all pages for the following javascript-compatible regex:
-<br>
+    <br>Search all pages for the following javascript-compatible regex:<br>
 
-<div class="form">
-  /
-  <input id="watchlist_term_input" type="text" placeholder="sandwich|more_sandwich" />
-  /gi
-  <input id="save" type="button" value="Save"><span id="status"></span>
-</div>
+    <div class="form">
+      /
+      <input id="watchlist_term_input" type="text" placeholder="sandwich|more_sandwich" />
+      /gi
+      <input id="save" type="button" value="Save"><span id="status"></span>
+    </div>
 
-</body>
+  </body>
 </html>
