@@ -1,11 +1,19 @@
+function is_a_match(el, regex) {
+    // Noscript tag contents present as text and behave
+    // poorly; e.g. Google results for terms that happen to be
+    // watchlisted.
+    var bad_parents = "noscript, textarea";
+    return el.nodeType == 3
+        && regex.test(el.nodeValue)
+        && $(el).parent(bad_parents).length == 0;
+}
+
 function highlight(els, str, className) {
     var regex = new RegExp(str, "gi");
     var matched_count = {};
     els.each(function(_, el) {
         $(el).contents().filter(function(__, el_) {
-            // Noscript tag contents present as text and behave
-            // poorly; e.g. Google results for terms that happen to be watchlisted.
-            return el_.nodeType == 3 && regex.test(el_.nodeValue) && $(el_).parent("noscript, textarea").length == 0;
+            return is_a_match(el_, regex);
         }).replaceWith(function() {
             return (this.nodeValue || "").replace(regex, function(match) {
                 key = match.toLowerCase();
