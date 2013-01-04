@@ -6,28 +6,21 @@
       .form {
           margin: 1em;
       }
-
-      #watchlist_term_input {
-          background-color:#eef;
-          display:inline;
-          width:30em;
-          border: none;
-          border-bottom: 1px dashed #999;
+      section {
+          margin-bottom: 1em;
       }
-
+      label {
+          display: block;
+      }
+      textarea {
+          background-color:#eef;
+          width:40em;
+          height:20em;
+          border: 1px solid #ddd;
+      }
       #status {
           color: #333;
           margin-left: 1em;
-      }
-
-      .example {
-          background-color: #FFE303;
-          display: inline-block;
-          font-family: monospace;
-          padding: .6em 1em;
-      }
-      .example-term {
-          font-weight: 800;
       }
     </style>
 
@@ -36,15 +29,29 @@
   <script src="options.js"></script>
 
   <body>
-    <h2>Populate WatchList</h2>
-
-    <br>Search all pages for the following javascript-compatible regex:<br>
+    <h2>WatchList</h2>
+    <h3>Use Javascript-compatible regexes. Newlines will be treated as pipe characters.</h3>
 
     <div class="form">
-      /
-      <input id="watchlist_term_input" type="text" placeholder="sandwich|more_sandwich" />
-      /gi
+
+      <section>
+        <label for="watchlist_term_input">Highlight the following terms:</label>
+        <textarea id="watchlist_term_input">
+sandwich
+more_sandwich
+        </textarea>
+      </section>
+
+      <section>
+        <label for="watchlist_blacklist_input">Do not highlight terms if any of the following entries match the current URL:</label>
+        <textarea id="watchlist_blacklist_input">
+twitter.com
+google.com
+        </textarea>
+      </section>
+
       <input id="save" type="button" value="Save"><span id="status"></span>
+
     </div>
 
   </body>

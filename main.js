@@ -1,6 +1,6 @@
 function is_a_match(el, regex) {
-    // Noscript tag contents present as text and behave
-    // poorly; e.g. Google results for terms that happen to be
+    // Noscript tag contents present as text and behave poorly; e.g.
+    // Google results for terms that happen to be
     // watchlisted.
     var bad_parents = "noscript, textarea";
     return el.nodeType == 3
@@ -55,11 +55,26 @@ function highlight_watchlist(terms) {
     };
 }
 
-$(document).ready(function(){
-    chrome.storage.local.get('watchlist_terms', function(data) {
-        if (data.watchlist_terms) {
-            var fn = function() { highlight_watchlist(data.watchlist_terms); };
-            setTimeout(fn, 1);
+function url_allowed(blacklist) {
+    if (typeof(blacklist) === "undefined") {
+        return true;
+    }
+    var regex = new RegExp(blacklist);
+    if (regex.test(document.URL)) {
+        return false;
+    }
+    return true;
+}
+
+$(document).ready(function() {
+    chrome.storage.local.get('watchlist_terms', function(term_data) {
+        if (term_data.watchlist_terms) {
+            chrome.storage.local.get('watchlist_blacklist', function(blacklist_data) {
+                if (url_allowed(blacklist_data.watchlist_blacklist)) {
+                    var fn = function() { highlight_watchlist(term_data.watchlist_terms); };
+                    setTimeout(fn, 1);
+                }
+            });
         }
     });
 });
