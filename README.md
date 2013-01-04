@@ -22,6 +22,4 @@ When this thing seems solid enough, I'll make it available in the usual manner v
 TODO (Known shortcomings that will be addressed upon reaching an undetermined annoyance threshold)
 ----
 
-1. Domain blacklist to cut down on positives we don't care about.
-2. Allow control over regex flags; I want global and case-insensitive, so that's what you get for now.
-3. Allow multiple regexes, instead of dealing with a single unwieldy regex.
+Allow control over regex flags; I want global and case-insensitive, so that's what you get for now.
