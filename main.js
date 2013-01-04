@@ -2,7 +2,7 @@ function is_a_match(el, regex) {
     // Noscript tag contents present as text and behave poorly; e.g.
     // Google results for terms that happen to be
     // watchlisted.
-    var bad_parents = "noscript, textarea";
+    var bad_parents = "noscript, script, textarea";
     return el.nodeType == 3
         && regex.test(el.nodeValue)
         && $(el).parent(bad_parents).length == 0;
