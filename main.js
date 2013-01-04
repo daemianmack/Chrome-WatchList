@@ -33,7 +33,7 @@ function get_time() {
 function highlight_watchlist(terms) {
     var start_time = get_time();
 
-    var els = $("body").find("*");
+    var els = $("body").find("*:not(iframe)");
     var results = highlight(els, terms, "watchlist-highlight");
 
     if (Object.keys(results).length) {
