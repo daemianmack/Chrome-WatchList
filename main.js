@@ -2,11 +2,23 @@ function is_a_match(el, regex) {
     return el.nodeType == 3 && regex.test(el.nodeValue);
 }
 
+function is_highlightable(el) {
+    var unhighlightable_parents = "textarea";
+    var r_unhighlightable_parents = new RegExp(unhighlightable_parents, "i");
+    return r_unhighlightable_parents.test(el.tagName) === false
+        && $(el).parent(unhighlightable_parents).length === 0;
+}
+
 function in_current_url(term) {
     var r = new RegExp(term, "gi");
     if (r.test(document.URL)) {
         return true;
     }
+}
+
+// Preserve markup that may have been entered into, say, a textarea.
+function escape_markup(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function highlight(els, str, className) {
@@ -16,7 +28,9 @@ function highlight(els, str, className) {
         $(el).contents().filter(function(__, el_) {
             return is_a_match(el_, regex);
         }).replaceWith(function() {
-            return (this.nodeValue || "").replace(regex, function(match) {
+
+            var nodeValue = escape_markup(this.nodeValue)
+            return nodeValue.replace(regex, function(match) {
 
                 // Return unchanged -- without highlighting or counting.
                 if (in_current_url(match)) {
@@ -25,7 +39,15 @@ function highlight(els, str, className) {
 
                 key = match.toLowerCase();
                 matched_count[key] = (matched_count[key] || 0) + 1;
-                return "<span class=\"" + className + "\">" + match + "</span>";
+
+                if (is_highlightable(el)) {
+                    // Return with highlighting.
+                    return "<span class=\"" + className + "\">" + match + "</span>";
+                }
+
+                // Return without highlighting.
+                return match;
+
             });
         });
     });
@@ -40,7 +62,7 @@ function get_time() {
 function highlight_watchlist(terms) {
     var start_time = get_time();
 
-    var els = $("body").find("*:not(iframe, noscript, script, textarea)");
+    var els = $("body").find("*:not(iframe, noscript, script)");
     var results = highlight(els, terms, "watchlist-highlight");
 
     if (Object.keys(results).length) {
