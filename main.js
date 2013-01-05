@@ -2,6 +2,13 @@ function is_a_match(el, regex) {
     return el.nodeType == 3 && regex.test(el.nodeValue);
 }
 
+function in_current_url(term) {
+    var r = new RegExp(term, "gi");
+    if (r.test(document.URL)) {
+        return true;
+    }
+}
+
 function highlight(els, str, className) {
     var regex = new RegExp(str, "gi");
     var matched_count = {};
@@ -10,6 +17,12 @@ function highlight(els, str, className) {
             return is_a_match(el_, regex);
         }).replaceWith(function() {
             return (this.nodeValue || "").replace(regex, function(match) {
+
+                // Return unchanged -- without highlighting or counting.
+                if (in_current_url(match)) {
+                    return match;
+                }
+
                 key = match.toLowerCase();
                 matched_count[key] = (matched_count[key] || 0) + 1;
                 return "<span class=\"" + className + "\">" + match + "</span>";
