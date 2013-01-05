@@ -1,11 +1,5 @@
 function is_a_match(el, regex) {
-    // Noscript tag contents present as text and behave poorly; e.g.
-    // Google results for terms that happen to be
-    // watchlisted.
-    var bad_parents = "noscript, script, textarea";
-    return el.nodeType == 3
-        && regex.test(el.nodeValue)
-        && $(el).parent(bad_parents).length == 0;
+    return el.nodeType == 3 && regex.test(el.nodeValue);
 }
 
 function highlight(els, str, className) {
@@ -33,7 +27,7 @@ function get_time() {
 function highlight_watchlist(terms) {
     var start_time = get_time();
 
-    var els = $("body").find("*:not(iframe)");
+    var els = $("body").find("*:not(iframe, noscript, script, textarea)");
     var results = highlight(els, terms, "watchlist-highlight");
 
     if (Object.keys(results).length) {
