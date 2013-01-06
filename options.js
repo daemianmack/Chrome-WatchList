@@ -21,7 +21,8 @@ function save_options() {
 }
 
 function to_machine(data) {
-    return data.split("\n").join("|");
+    // .filter out "" resulting from superfluous newline.
+    return data.split("\n").filter(Boolean).join("|");
 }
 
 function to_human(data) {
