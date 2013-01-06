@@ -59,6 +59,13 @@ function get_time() {
     return now.getTime();
 }
 
+function perform_dramatic_statusbar_reveal() {
+    setTimeout(function() {
+        $('#watchlist-status-bar').removeClass('loading');
+        $('#watchlist-status-bar').addClass('loaded');
+    }, 1);
+}
+
 function highlight_watchlist(terms) {
     var start_time = get_time();
 
@@ -75,7 +82,9 @@ function highlight_watchlist(terms) {
 
         $.get(chrome.extension.getURL("statusbar.html"), {}, function(data) {
             $('body').append(data);
+
             $("#watchlist-results").text(printable);
+            perform_dramatic_statusbar_reveal();
 
             var diag = "elements considered: "+ els.length +", ms elapsed: "+ (stop_time - start_time) +" ";
             $(".watchlist-status-bar-item").attr("title", diag);
