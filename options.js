@@ -45,5 +45,5 @@ function retrieve_options() {
 
 window.onload = function() {
     retrieve_options();
-    document.querySelector('#save').addEventListener('click', save_options);
+    document.getElementById('save').onclick = save_options;
 }
