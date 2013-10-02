@@ -6,12 +6,12 @@ Reading a ZDnet article last night about Google constraining license proliferati
 
 Scratching my own itch, I spent about an hour ripping off the Chrome example extension 'Sandwichbar', which notifies you if any webpage contains the text 'sandwich'. The exercise it leaves for the reader is to expand the script to notify you of *any* arbitrary regex.
 
-That's what this is. It uses localStorage so your chosen regex is persistent.
+That's what this is. It uses Chrome's sync API for Storage so your options are persistent across all your devices.
 
 INSTALL
 -------
 
-When this thing seems solid enough, I'll make it available in the usual manner via the Chrome webstore. Until then...
+It's available in the usual manner via the Chrome webstore. If you'd like to run the git version, checkout the repo, then...
 
 1. Wrench thingy > Tools > Extensions. 
 2. Hit "Load unpacked extension..." which you'll only see if you're in developer mode. 

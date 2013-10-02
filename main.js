@@ -52,7 +52,7 @@ function highlight(els, str, className) {
         });
     });
     return matched_count;
-};
+}
 
 function get_time() {
     var now = new Date();
@@ -105,9 +105,9 @@ function url_allowed(blacklist) {
 }
 
 $(document).ready(function() {
-    chrome.storage.local.get('watchlist_terms', function(term_data) {
+    chrome.storage.sync.get('watchlist_terms', function(term_data) {
         if (term_data.watchlist_terms) {
-            chrome.storage.local.get('watchlist_blacklist', function(blacklist_data) {
+            chrome.storage.sync.get('watchlist_blacklist', function(blacklist_data) {
                 if (url_allowed(blacklist_data.watchlist_blacklist)) {
                     var fn = function() { highlight_watchlist(term_data.watchlist_terms); };
                     setTimeout(fn, 1);
