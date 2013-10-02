@@ -86,7 +86,7 @@ function highlight_watchlist(terms) {
             $("#watchlist-results").text(printable);
             perform_dramatic_statusbar_reveal();
 
-            var diag = "elements considered: "+ els.length +", ms elapsed: "+ (stop_time - start_time) +" ";
+            var diag = els.length + " elements considered, " + (stop_time - start_time) + " ms elapsed";
             $(".watchlist-status-bar-item").attr("title", diag);
 
         }, 'html');
