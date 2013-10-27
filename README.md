@@ -23,3 +23,7 @@ TODO (Known shortcomings that will be addressed upon reaching an undetermined an
 ----
 
 Allow control over regex flags; I want global and case-insensitive, so that's what you get for now.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/daemianmack/chrome-watchlist/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
