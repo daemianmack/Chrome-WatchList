@@ -20,10 +20,9 @@ It's available in the usual manner via the Chrome webstore. If you'd like to run
 5. Rejoice in a life *finally* worth living.
 
 TODO (Known shortcomings that will be addressed upon reaching an undetermined annoyance threshold)
-----
 
 Allow control over regex flags; I want global and case-insensitive, so that's what you get for now.
 
+Better performance. Mousing over the leftmost portion of the extension UI shows a count of the elements considered and the elapsed time. [Reddit](http://reddit.com) has a helpfully complex page -- considering ~5500 page elements for highlighting against a regex list of ~300 items, elapsed time of all script actions clusters around 300ms. The same regex list against [Yahoo](http://yahoo.com)'s ~1500 elements produces numbers that cluster around 160ms. This could be better.
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/daemianmack/chrome-watchlist/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
