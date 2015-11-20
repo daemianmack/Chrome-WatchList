@@ -1,0 +1,26 @@
+/* this manifest is for development only
+   we include all files individually
+   also we allow unsafe eval for figwheel
+*/
+{
+  "name": "chromex-sample-dev",
+    "version": "0.1.0",
+    "web_accessible_resources": ["statusbar.html"],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+          "compiled/content_script/chromex-sample.js"
+      ],
+        "css": ["matches.css"],
+      "run_at": "document_end"
+    }
+  ],
+ "options_page": "options.html",
+  "permissions": [
+    "storage"
+  ],
+  "manifest_version": 2
+}
