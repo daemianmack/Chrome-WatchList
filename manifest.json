@@ -1,6 +1,6 @@
 {
 	"name": "WatchList",
-	"version": "0.4",
+	"version": "0.5",
         "manifest_version": 2,
 	"description": "Notifies you when the current page contains words of your choosing.",
         "permissions": [

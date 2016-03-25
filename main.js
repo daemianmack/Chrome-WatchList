@@ -1,43 +1,23 @@
-UNHIGHLIGHTABLE_PARENTS = "textarea"
-
-
-function is_a_text_match(el, regex) {
-    return el.nodeType == 3 && regex.test(el.nodeValue);
-}
-
-function is_highlightable(el) {
-    // Node's parent is not one of UNHIGHLIGHTABLE_PARENTS.
-    return $(el).parent(UNHIGHLIGHTABLE_PARENTS).length === 0;
-}
-
-function in_current_url(regex) {
-     return regex.test(document.URL);
-}
-
-function is_good_match(el, regex) {
-    // regex must match against a text node
-    // and el must be a highlightable tag
-    // and regex must not match URL.
-    return (is_a_text_match(el, regex) &&
-            is_highlightable(el) &&
-            (! in_current_url(regex)));
+function is_a_text_node(el) {
+    return el.nodeType == 3;
 }
 
 function highlight(els, terms, className) {
-    var regex = new RegExp(terms, "gi");
     var matched_count = {};
+    var regex = new RegExp(terms, "gi");
+    var url = document.URL.toLowerCase();
     els.contents().filter(function(_, el) {
-        return is_good_match(el, regex);
-    }).replaceWith(function() {
-
-        return this.nodeValue.replace(regex, function(match) {
-
-            key = match.toLowerCase();
-            matched_count[key] = (matched_count[key] || 0) + 1;
-
-            // Return match value with highlight class wrapper.
-            return "<span class=\"" + className + "\">" + match + "</span>";
-        });
+        return is_a_text_node(el);
+    }).each(function(_, el) {
+        // .exec on global regexes mutates a lastIndex pointer.
+        // Walk through match-results, don't use `regex` "out-of-band".
+        while ((result = regex.exec(el.nodeValue)) !== null) {
+            matched = result[0].toLowerCase();
+            if (! url.match(matched)) {
+                $(el).parent().addClass("watchlist-highlight");
+                matched_count[matched] = (matched_count[matched] || 0) + 1;
+            }
+        }
     });
     return matched_count;
 }
