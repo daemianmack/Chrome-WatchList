@@ -1,18 +1,11 @@
 function save_options() {
-    var val = document.getElementById('watchlist_term_input').value;
-    if (val) {
-        chrome.storage.sync.set({'watchlist_terms': to_machine(val)});
-    } else {
-        chrome.storage.sync.remove('watchlist_terms');
-    }
+    var terms     = document.getElementById('watchlist_term_input').value;
+    var blacklist = document.getElementById('watchlist_blacklist_input').value;
 
-    var val = document.getElementById('watchlist_blacklist_input').value;
-    if (val) {
-        chrome.storage.sync.set({'watchlist_blacklist': to_machine(val)});
-    } else {
-        chrome.storage.sync.remove('watchlist_blacklist');
-    }
-
+    chrome.storage.sync.set({'watchlist': {'terms':     to_machine(terms),
+                                           'blacklist': to_machine(blacklist)}});
+    
+    
     var status = document.getElementById('status');
     status.innerHTML = 'Options Saved.';
     setTimeout(function() {
@@ -30,17 +23,15 @@ function to_human(data) {
 }
 
 function retrieve_options() {
-    chrome.storage.sync.get('watchlist_terms', function(data) {
-        if (data.watchlist_terms) {
-            document.getElementById('watchlist_term_input').value = to_human(data.watchlist_terms);
+    chrome.storage.sync.get('watchlist', function(data) {
+        if (data.watchlist.terms) {
+            document.getElementById('watchlist_term_input').value = to_human(data.watchlist.terms);
+        }
+        if (data.watchlist.blacklist) {
+            document.getElementById('watchlist_blacklist_input').value = to_human(data.watchlist.blacklist);
         }
     });
-
-    chrome.storage.sync.get('watchlist_blacklist', function(data) {
-        if (data.watchlist_blacklist) {
-            document.getElementById('watchlist_blacklist_input').value = to_human(data.watchlist_blacklist);
-        }
-    });
+ 
 }
 
 window.onload = function() {

@@ -53,15 +53,17 @@
 
 (defn ^:export init!
   []
-  (.get js/chrome.storage.sync "watchlist_terms"
-        (fn [watchlist-data]
-          (let [data (js->clj watchlist-data :keywordize-keys true)]
-            (if (:watchlist_terms data)
-              (do (dispatch-sync [:initialize])
-                  (let [attrs (clj->js {"className" "watchlist-wrapper"})
-                        app-root (.createDom goog.dom "div" attrs)]
-                    (.appendChild (.querySelector js/document "body") app-root)
-                    (reagent/render [simple-example] app-root)))
-              (inspect :nope data))))))
+  (.get js/chrome.storage.sync "watchlist"
+        (fn [option-data]
+          (let [{{:strs [terms blacklist]} "watchlist"} (js->clj option-data)]
+            (if terms
+              (if (url-allowed? blacklist)
+                (do (dispatch-sync [:initialize])
+                    (let [attrs (clj->js {"className" "watchlist-wrapper"})
+                          app-root (.createDom goog.dom "div" attrs)]
+                      (.appendChild (.querySelector js/document "body") app-root)
+                      (reagent/render [simple-example] app-root)))
+                (inspect :blacklist-denied blacklist))
+              (inspect :no-watchlist))))))
 
 
