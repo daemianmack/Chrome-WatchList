@@ -32,12 +32,13 @@
                                (for [match (re-seq terms html)]
                                  {:term match :node el}))) 
                            matches)]
-       (merge db {:matches (vec matches)})))))
+       (merge db {:started (.getTime (js/Date.))
+                  :matches (vec matches)})))))
 
 (register-sub
  :initialize
  (fn [db _]
-   (reaction (:matches @db))))
+   (reaction @db)))
 
 (defn simple-example
   []
@@ -47,8 +48,11 @@
        [:span {:class "watchlist-status-bar-item"}
         [:a {:href "/BARF"}]]
        [:span {:class "watchlist-status-bar-separator"}]
-       (for [[group-term hits] (group-by :term @matches)]
-         [:span {:id :watchlist-results :class "watchlist-status-bar-item"}
+       (for [[group-term hits] (group-by :term (:matches @matches))]
+         [:span {:id :watchlist-results
+                 :class "watchlist-status-bar-item"
+                 :title (str (- (.getTime (js/Date.)) (:started @matches))
+                             " ms elapsed")}
           group-term ":" (count hits)])])))
 
 (defn ^:export init!
