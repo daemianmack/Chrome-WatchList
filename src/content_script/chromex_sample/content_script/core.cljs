@@ -2,8 +2,8 @@
   (:require-macros [reagent.ratom :refer [reaction]]
                    [content-script.chromex-sample.content-script.macros :refer [inspect]])
   (:require [reagent.core :as reagent]
-            [goog.dom :as gdom]
-            [goog.net.XhrIo]
+            [goog.dom]
+            [clojure.string :as s]
             [re-frame.core :refer [register-handler
                                    path
                                    register-sub
@@ -16,24 +16,32 @@
   (-seq [array] (array-seq array 0)))
 
 
+(defn node-seq
+  []
+  (let [tree (.createTreeWalker js/document
+                                (.-body js/document)
+                                (.-SHOW_TEXT js/NodeFilter))]
+    (take-while some? (repeatedly #(.nextNode tree)))))
+
+(defn classify
+  [s]
+  (str "<mark class=\"watchlist-highlight\">" s "</mark>"))
 
 (register-handler                 
  :initialize                     
  (fn
    [db _]
    (let [terms #"dynamically|created|who"]
-     (let [elems (.querySelectorAll js/document
-                                    "*:not(iframe):not(noscript):not(script):not(textarea)")
-           elems (.call js/Array.prototype.slice elems)
-           matches (.filter elems (fn [x] (re-find terms (.-innerHTML x))))
-           matches (mapcat (fn [el] 
-                             (let [html (.-innerHTML el)]
-                               (set! (.-innerHTML el) (str "<em>" html "</em>")) 
-                               (for [match (re-seq terms html)]
-                                 {:term match :node el}))) 
-                           matches)]
+     (let [nodes   (filterv #(re-find terms (.-textContent %)) (node-seq))
+           matches (for [node nodes
+                         :let [parent (.-parentNode node)
+                               html   (.-innerHTML parent)
+                               markup (s/replace html terms classify)
+                               _      (set! (.-innerHTML parent) markup)]
+                         match (re-seq terms html)]
+                     {:term match :node parent})]
        (merge db {:started (.getTime (js/Date.))
-                  :matches (vec matches)})))))
+                  :matches matches})))))
 
 (register-sub
  :initialize
