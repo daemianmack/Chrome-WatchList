@@ -40,20 +40,24 @@
  (fn [db _]
    (reaction @db)))
 
-(defn simple-example
+(defn display-match
+  [group-term hits]
+  [:span {:class "watchlist-status-bar-item"}
+   group-term ":" (count hits)])
+
+(defn statusbar
   []
   (let [matches (subscribe [:initialize])]
     (fn []
-      [:div {:id "watchlist-status-bar" :class :loading}
+      [:div {:id "watchlist-status-bar"
+             :class :loading
+             :title (str (- (.getTime (js/Date.)) (:started @matches))
+                         " ms elapsed")}
        [:span {:class "watchlist-status-bar-item"}
         [:a {:href "/BARF"}]]
        [:span {:class "watchlist-status-bar-separator"}]
        (for [[group-term hits] (group-by :term (:matches @matches))]
-         [:span {:id :watchlist-results
-                 :class "watchlist-status-bar-item"
-                 :title (str (- (.getTime (js/Date.)) (:started @matches))
-                             " ms elapsed")}
-          group-term ":" (count hits)])])))
+         [display-match group-term hits])])))
 
 (defn ^:export init!
   []
@@ -66,7 +70,7 @@
                     (let [attrs (clj->js {"className" "watchlist-wrapper"})
                           app-root (.createDom goog.dom "div" attrs)]
                       (.appendChild (.querySelector js/document "body") app-root)
-                      (reagent/render [simple-example] app-root)))
+                      (reagent/render [statusbar] app-root)))
                 (inspect :blacklist-denied blacklist))
               (inspect :no-watchlist))))))
 
