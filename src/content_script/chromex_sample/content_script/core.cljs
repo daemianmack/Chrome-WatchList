@@ -57,7 +57,7 @@
         [:a {:href "/BARF"}]]
        [:span {:class "watchlist-status-bar-separator"}]
        (for [[group-term hits] (group-by :term (:matches @matches))]
-         [display-match group-term hits])])))
+         ^{:key group-term} [display-match group-term hits])])))
 
 (defn ^:export init!
   []
