@@ -47,10 +47,7 @@
 (defn statusbar []
   (let [db (subscribe [:db])]
     (fn []
-      [:div {:id "watchlist-status-bar"
-             :class :loading
-             :title (str (- (.getTime (js/Date.)) (:started @db))
-                         " ms elapsed")}
+      [:div {:id "watchlist-status-bar" :class :loading}
        [:span {:class "watchlist-status-bar-item"}
         [:a {:href "/BARF"}]]
        [:span {:class "watchlist-status-bar-separator"}]
