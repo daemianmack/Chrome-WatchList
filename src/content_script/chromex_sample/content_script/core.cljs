@@ -5,33 +5,27 @@
             [goog.dom]
             [clojure.string :as s]
             [re-frame.core :refer [register-handler
-                                   path
                                    register-sub
                                    dispatch
-                                   dispatch-sync
                                    subscribe]]))
 
-(extend-type js/NodeList
-  ISeqable
-  (-seq [array] (array-seq array 0)))
-
-
-(defn node-seq
-  []
+(defn node-seq []
   (let [tree (.createTreeWalker js/document
                                 (.-body js/document)
                                 (.-SHOW_TEXT js/NodeFilter))]
     (take-while some? (repeatedly #(.nextNode tree)))))
 
-(defn classify
-  [s]
+(defn classify [s]
   (str "<mark class=\"watchlist-highlight\">" s "</mark>"))
 
-(register-handler                 
- :initialize                     
- (fn
-   [db _]
-   (let [terms #"dynamically|created|who"]
+(register-sub
+ :db
+ (fn [db _]
+   (reaction @db)))
+
+(register-handler :initialize
+ (fn [db [_ option-data]]
+   (let [terms (re-pattern (:terms option-data))]
      (let [nodes   (filterv #(re-find terms (.-textContent %)) (node-seq))
            matches (for [node nodes
                          :let [parent (.-parentNode node)
@@ -43,43 +37,39 @@
        (merge db {:started (.getTime (js/Date.))
                   :matches matches})))))
 
-(register-sub
- :initialize
- (fn [db _]
-   (reaction @db)))
-
-(defn display-match
-  [group-term hits]
-  [:span {:class "watchlist-status-bar-item"}
+(defn display-match [group-term hits started]
+  [:span {:class "watchlist-status-bar-item"
+          :title (str (- (.getTime (js/Date.))
+                         started)
+                      " ms elapsed")}
    group-term ":" (count hits)])
 
-(defn statusbar
-  []
-  (let [matches (subscribe [:initialize])]
+(defn statusbar []
+  (let [db (subscribe [:db])]
     (fn []
       [:div {:id "watchlist-status-bar"
              :class :loading
-             :title (str (- (.getTime (js/Date.)) (:started @matches))
+             :title (str (- (.getTime (js/Date.)) (:started @db))
                          " ms elapsed")}
        [:span {:class "watchlist-status-bar-item"}
         [:a {:href "/BARF"}]]
        [:span {:class "watchlist-status-bar-separator"}]
-       (for [[group-term hits] (group-by :term (:matches @matches))]
-         ^{:key group-term} [display-match group-term hits])])))
+       (doall
+        (for [[group-term hits] (group-by :term (:matches @db))]
+          ^{:key group-term} [display-match group-term hits (:started @db)]))])))
 
-(defn ^:export init!
-  []
+(defn url-allowed? [blacklist]
+  (not (and (some? blacklist)
+            (re-find (re-pattern blacklist)
+                     (.-URL js/document)))))
+
+(defn ^:export init! []
   (.get js/chrome.storage.sync "watchlist"
-        (fn [option-data]
-          (let [{{:strs [terms blacklist]} "watchlist"} (js->clj option-data)]
-            (if terms
-              (if (url-allowed? blacklist)
-                (do (dispatch-sync [:initialize])
-                    (let [attrs (clj->js {"className" "watchlist-wrapper"})
-                          app-root (.createDom goog.dom "div" attrs)]
-                      (.appendChild (.querySelector js/document "body") app-root)
-                      (reagent/render [statusbar] app-root)))
-                (inspect :blacklist-denied blacklist))
-              (inspect :no-watchlist))))))
-
-
+        #(when-let [options-data (:watchlist (js->clj % :keywordize-keys true))]
+           (dispatch [:initialize options-data])
+           (let [{:keys [terms blacklist]} options-data]
+             (when (and terms (url-allowed? blacklist))
+               (do (let [attrs (clj->js {"className" "watchlist-wrapper"})
+                         app-root (.createDom goog.dom "div" attrs)]
+                     (.appendChild (.querySelector js/document "body") app-root)
+                     (reagent/render [statusbar] app-root))))))))
