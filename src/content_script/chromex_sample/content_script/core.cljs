@@ -66,7 +66,7 @@
            (dispatch [:initialize options-data])
            (let [{:keys [terms blacklist]} options-data]
              (when (and terms (url-allowed? blacklist))
-               (do (let [attrs (clj->js {"className" "watchlist-wrapper"})
-                         app-root (.createDom goog.dom "div" attrs)]
-                     (.appendChild (.querySelector js/document "body") app-root)
-                     (reagent/render [statusbar] app-root))))))))
+               (let [attrs (clj->js {"className" "watchlist-wrapper"})
+                     app-root (.createDom goog.dom "div" attrs)]
+                 (.appendChild (.querySelector js/document "body") app-root)
+                 (reagent/render [statusbar] app-root)))))))
