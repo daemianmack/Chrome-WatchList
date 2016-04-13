@@ -48,8 +48,7 @@
   (let [db (subscribe [:db])]
     (fn []
       [:div {:id "watchlist-status-bar" :class :loading}
-       [:span {:class "watchlist-status-bar-item"}
-        [:a {:href "/BARF"}]]
+       [:span {:class "watchlist-status-bar-item"} "Watchlist"]
        [:span {:class "watchlist-status-bar-separator"}]
        (doall
         (for [[group-term hits] (group-by :term (:matches @db))]
