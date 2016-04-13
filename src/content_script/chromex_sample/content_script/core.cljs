@@ -9,31 +9,70 @@
                                    dispatch
                                    subscribe]]))
 
-(defn node-seq []
-  (let [tree (.createTreeWalker js/document
-                                (.-body js/document)
-                                (.-SHOW_TEXT js/NodeFilter))]
-    (take-while some? (repeatedly #(.nextNode tree)))))
-
-(defn classify [s]
-  (str "<mark class=\"watchlist-highlight\">" s "</mark>"))
-
 (register-sub
  :db
  (fn [db _]
    (reaction @db)))
 
-(register-handler :initialize
+(defn node-seq []
+  (let [tree (.createTreeWalker js/document
+                                (.-body js/document)
+                                NodeFilter.SHOW_TEXT)]
+    (take-while some? (repeatedly #(.nextNode tree)))))
+
+(defn text-node [text] (.createTextNode js/document text))
+
+(defn mark-text-node [text]
+  (.createDom goog.dom "mark"
+              (clj->js {:class "watchlist-highlight"})
+              (.createTextNode goog.dom text)))
+
+(defn text [s] {:type :text :body s})
+(defn html [s] {:type :html :body s})
+
+(defn text-gap [matches s start end]
+  (if (< start end)
+    (conj matches (text (subs s start end)))
+    matches))
+
+(defn replace-matches
+  [re s]
+  ;; Needs to make its own g regexp?
+  (reduce 
+   (fn [{:keys [matches prev-idx] :as acc} [term _ :as match]] 
+     (if term
+       (-> acc
+           (update :matches text-gap s prev-idx (.-index match))
+           (update :matches conj (html term))
+           (assoc  :prev-idx (+ (.-index match) (count term))))
+       (reduced (text-gap matches s prev-idx (count s))))) 
+   {:matches [] :prev-idx 0} 
+   (repeatedly #(.exec re s))))
+
+(defn new-nodes
+  [{:keys [type body] :as instructions}]
+  (case type
+    :text {:node (text-node body)}
+    :html {:node (mark-text-node body) :term body}))
+
+(register-handler
+ :initialize
  (fn [db [_ option-data]]
-   (let [terms (re-pattern (:terms option-data))]
+   (let [terms   (js/RegExp. (:terms option-data))
+         terms-g (js/RegExp. (:terms option-data) "g")]
      (let [nodes   (filterv #(re-find terms (.-textContent %)) (node-seq))
-           matches (for [node nodes
-                         :let [parent (.-parentNode node)
-                               html   (.-innerHTML parent)
-                               markup (s/replace html terms classify)
-                               _      (set! (.-innerHTML parent) markup)]
-                         match (re-seq terms html)]
-                     {:term match :node parent})]
+           _ (.log js/console (str "nodes found" (count nodes)))
+           new-kids (doall (for [node nodes
+                                 :let [content (.-textContent node)]]
+                             [node (map new-nodes (replace-matches terms-g content))]))
+           _ (do (doseq [[node new-kid-seq] new-kids
+                         kid new-kid-seq
+                         :let [parent (.-parentNode node)]]
+                   (.insertBefore parent (:node kid) node))
+                 (doseq [[node _] new-kids]
+                   (.removeChild (.-parentNode node) node)))
+           matches (doall (for [mark (filter :term (mapcat second new-kids))]
+                            {:term (str (:term mark)) :node (.-parentNode (:node mark))}))]
        (merge db {:started (.getTime (js/Date.))
                   :matches matches})))))
 
