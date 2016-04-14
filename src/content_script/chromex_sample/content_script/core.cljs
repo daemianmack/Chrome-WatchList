@@ -14,6 +14,10 @@
  (fn [db _]
    (reaction @db)))
 
+(register-handler
+ :started
+ (fn [db _]
+   (assoc db :started (.getTime (js/Date.)))))
 
 (register-handler
  :initialize
@@ -57,6 +61,7 @@
                      (.-URL js/document)))))
 
 (defn ^:export init! []
+  (dispatch [:started])
   (.get js/chrome.storage.sync "watchlist"
         #(when-let [options-data (:watchlist (js->clj % :keywordize-keys true))]
            (dispatch [:initialize options-data])
