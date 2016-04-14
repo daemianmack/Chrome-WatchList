@@ -1,4 +1,5 @@
-(ns chromex-sample.content-script.nodes)
+(ns chromex-sample.content-script.nodes
+  (:require [clojure.string :refer [replace]]))
 
 (defn text-objs []
   (let [tree (.createTreeWalker js/document
@@ -58,3 +59,14 @@
                         mark (filter :html new-node-seq)]
                     {:term (:html mark) :node (:node mark)})]
     new-nodes))
+
+(defn ancestors-of [node]
+  (take-while some? (iterate #(.-offsetParent %) (.-parentNode node))))
+
+(defn scroll-to-node!
+  [node]
+  (let [classes (replace (.-className node) #" watchlist-scrolled" "")]
+    (js/setTimeout (fn [] (set! (.-className node) classes)) 500)
+    (set! (.-className node) (str classes " watchlist-scrolled")))
+  (set! (.-scrollTop (.querySelector js/document "body"))
+        (reduce + 0 (map #(.-offsetTop %) (ancestors-of node)))))

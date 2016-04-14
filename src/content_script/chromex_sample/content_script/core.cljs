@@ -21,8 +21,21 @@
    (let [matches (nodes/highlight-matches! (:terms option-data))]
      (assoc db :matches matches))))
 
+(register-handler
+ :clicked
+ (fn [{:keys [clicks matches] :as db} [_ term-clicked]]
+   (let [streak (if (= term-clicked (:term clicks))
+                  (inc (:streak clicks))
+                  0)
+         matches (filter #(= term-clicked (:term %)) matches)
+         node (:node (nth matches (mod streak (count matches))))]
+     (nodes/scroll-to-node! node)
+     (merge db {:clicks {:term term-clicked
+                         :streak streak}}))))
+
 (defn display-match [group-term hits started]
   [:span {:class "watchlist-status-bar-item"
+          :on-click #(dispatch [:clicked group-term])
           :title (str (- (.getTime (js/Date.))
                          started)
                       " ms elapsed")}
