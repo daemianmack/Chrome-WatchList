@@ -1,32 +1,15 @@
-/* this manifest is for development only
-   we include all files individually
-   also we allow unsafe eval for figwheel
-*/
-{
-  "name": "chromex-sample-dev",
-    "version": "0.1.0",
-    "web_accessible_resources": ["statusbar.html", "watchlist-16.png"],
-  "content_scripts": [
-    {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-          "compiled/content_script/chromex-sample.js"
-      ],
-        "css": ["matches.css"],
-      "run_at": "document_end"
-    }
-  ],
-    "options_ui": {
-        "page": "options.html",
-        "chrome_style": true
-    },
-    "icons": {"16": "watchlist-16.png",
-              "48": "watchlist-48.png",
-              "128": "watchlist-128.png"},
-  "permissions": [
-    "storage"
-  ],
-  "manifest_version": 2
-}
+{"name": "chromex-sample-dev",
+ "version": "0.1.0",
+ "web_accessible_resources": ["statusbar.html",
+                              "watchlist-16.png"],
+ "content_scripts": [{"matches": ["<all_urls>"],
+                      "js":      ["compiled/content_script/chromex-sample.js"],
+                      "css":     ["matches.css"],
+                      "run_at":  "document_end"}],
+ "options_ui": {"page": "options.html",
+                "chrome_style": true},
+ "icons": {"16":  "watchlist-16.png",
+           "48":  "watchlist-48.png",
+           "128": "watchlist-128.png"},
+ "permissions": ["storage"],
+ "manifest_version": 2}
