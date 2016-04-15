@@ -10,9 +10,14 @@
                                    subscribe]]))
 
 (register-sub
- :db
+ :matches
  (fn [db _]
-   (reaction @db)))
+   (reaction (:matches @db))))
+
+(register-sub
+ :started
+ (fn [db _]
+   (reaction (:started @db))))
 
 (register-handler
  :started
@@ -46,14 +51,15 @@
    group-term ":" (count hits)])
 
 (defn statusbar []
-  (let [db (subscribe [:db])]
+  (let [matches (subscribe [:matches])
+        started (subscribe [:started])]
     (fn []
       [:div {:id "watchlist-status-bar" :class :loading}
        [:span {:class "watchlist-status-bar-item"} "Watchlist"]
        [:span {:class "watchlist-status-bar-separator"}]
        (doall
-        (for [[group-term hits] (group-by :term (:matches @db))]
-          ^{:key group-term} [display-match group-term hits (:started @db)]))])))
+        (for [[group-term hits] (group-by :term @matches)]
+          ^{:key group-term} [display-match group-term hits @started]))])))
 
 (defn url-allowed? [blacklist]
   (not (and (some? blacklist)
