@@ -58,7 +58,7 @@
        [:span {:class "watchlist-status-bar-item"} "Watchlist"]
        [:span {:class "watchlist-status-bar-separator"}]
        (doall
-        (for [[group-term hits] (group-by :term @matches)]
+        (for [[group-term hits] (sort-by key (group-by :term @matches))]
           ^{:key group-term} [display-match group-term hits @started]))])))
 
 (defn url-allowed? [blacklist]

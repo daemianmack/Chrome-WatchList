@@ -1,5 +1,5 @@
 (ns chromex-sample.content-script.nodes
-  (:require [clojure.string :refer [replace]]))
+  (:require [clojure.string :refer [lower-case replace]]))
 
 (defn text-objs []
   (let [tree (.createTreeWalker js/document
@@ -50,14 +50,14 @@
 
 (defn highlight-matches!
   [terms]
-  (let [regex (js/RegExp. terms "g")
+  (let [regex (js/RegExp. terms "gi")
         matching-texts (filterv #(re-find regex (.-textContent %)) (text-objs))
         new-nodes (for [old-node matching-texts
                         :let [new-node-descs (mark-matches regex (.-textContent old-node))
                               new-node-seq   (map mk-node new-node-descs)
                               _ (swap-in-nodes! old-node new-node-seq)]
                         mark (filter :html new-node-seq)]
-                    {:term (:html mark) :node (:node mark)})]
+                    {:term (lower-case (:html mark)) :node (:node mark)})]
     new-nodes))
 
 (defn ancestors-of [node]
