@@ -5,7 +5,7 @@
 {
   "name": "chromex-sample-dev",
     "version": "0.1.0",
-    "web_accessible_resources": ["statusbar.html"],
+    "web_accessible_resources": ["statusbar.html", "watchlist-16.png"],
   "content_scripts": [
     {
       "matches": [
@@ -22,6 +22,9 @@
         "page": "options.html",
         "chrome_style": true
     },
+    "icons": {"16": "watchlist-16.png",
+              "48": "watchlist-48.png",
+              "128": "watchlist-128.png"},
   "permissions": [
     "storage"
   ],
