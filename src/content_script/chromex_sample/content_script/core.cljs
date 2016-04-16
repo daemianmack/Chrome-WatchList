@@ -43,19 +43,23 @@
                          :streak streak}}))))
 
 (defn display-match [group-term hits started]
-  [:span {:class "watchlist-status-bar-item"
-          :on-click #(dispatch [:clicked group-term])
-          :title (str (- (.getTime (js/Date.))
-                         started)
-                      " ms elapsed")}
-   group-term ":" (count hits)])
+  (let [this (reagent/current-component)]
+    [:span {:class "watchlist-status-bar-item"
+            :on-mouse-over (nodes/evt nodes/add-class this "watchlist-item-hover")
+            :on-mouse-out  (nodes/evt nodes/del-class this "watchlist-item-hover")
+            :on-mouse-down (nodes/evt nodes/add-class this "watchlist-item-click")
+            :on-mouse-up   (nodes/evt nodes/del-class this "watchlist-item-click")
+            :on-click      #(dispatch [:clicked group-term])
+            :title         (str (- (.getTime (js/Date.)) started) " ms elapsed")}
+     group-term
+     [:span {:class "watchlist-status-bar-count"} (count hits)]]))
 
 (defn statusbar []
   (let [matches (subscribe [:matches])
         started (subscribe [:started])]
     (fn []
       (when (seq @matches)
-        [:div {:id "watchlist-status-bar" :class :loading}
+        [:div {:id "watchlist-status-bar" :class "watchlist-emphasized"}
          [:span {:class "watchlist-status-bar-item"} "Watchlist"]
          [:span {:class "watchlist-status-bar-separator"}]
          (doall

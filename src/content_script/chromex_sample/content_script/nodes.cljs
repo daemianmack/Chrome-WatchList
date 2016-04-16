@@ -1,6 +1,19 @@
 (ns chromex-sample.content-script.nodes
   (:require [clojure.string :refer [lower-case replace]]))
 
+
+(defn classes+ [node class] (str (.-className node) " " class))
+(defn classes- [node class] (replace (.-className node) (str " " class) ""))
+
+(defn add-class [node class] (set! (.-className node) (classes+ node class)))
+(defn del-class [node class] (set! (.-className node) (classes- node class)))
+
+(defn evt [mod-fn node class]
+  (fn [e]
+    (mod-fn (.getDOMNode node) class)
+    (.preventDefault e)))
+
+
 (defn text-objs []
   (let [tree (.createTreeWalker js/document
                                 (.-body js/document)
@@ -60,13 +73,14 @@
                     {:term (lower-case (:html mark)) :node (:node mark)})]
     new-nodes))
 
+
 (defn ancestors-of [node]
   (take-while some? (iterate #(.-offsetParent %) (.-parentNode node))))
 
 (defn scroll-to-node!
   [node]
-  (let [classes (replace (.-className node) #" watchlist-scrolled" "")]
+  (let [classes (classes- node "watchlist-emphasized")]
     (js/setTimeout (fn [] (set! (.-className node) classes)) 500)
-    (set! (.-className node) (str classes " watchlist-scrolled")))
+    (add-class node "watchlist-emphasized"))
   (set! (.-scrollTop (.querySelector js/document "body"))
         (reduce + 0 (map #(.-offsetTop %) (ancestors-of node)))))
