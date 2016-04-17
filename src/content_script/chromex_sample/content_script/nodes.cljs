@@ -28,10 +28,22 @@
     (conj matches (text (subs s start end)))
     matches))
 
+(defn url-contains-term?
+  [url [term]]
+  (re-find (re-pattern (str "(?i)" term)) url))
+
+(def non-nils-in-url
+  "`some?` plays two roles here: one incidental, one crucial.
+  1. nil shouldn't be passed to `url-contains-term?.`
+  2. nil *should* be passed to `mark-matches` which treats nil as a
+     sentinel to trigger a wrap-up phase."
+  (let [url-contains-term? (partial url-contains-term? (.-URL js/document))]
+    (every-pred some? url-contains-term?)))
+
 (defn mark-matches
-  [re s]
+  [regex s]
   (reduce 
-   (fn [{:keys [matches prev-idx] :as acc} [term _ :as match]] 
+   (fn [{:keys [matches prev-idx] :as acc} [term _ :as match]]
      (if term
        (-> acc
            (update :matches text-gap s prev-idx (.-index match))
@@ -39,7 +51,7 @@
            (assoc  :prev-idx (+ (.-index match) (count term))))
        (reduced (text-gap matches s prev-idx (count s))))) 
    {:matches [] :prev-idx 0} 
-   (repeatedly #(.exec re s))))
+   (remove non-nils-in-url (repeatedly #(.exec regex s)))))
 
 (defn mk-text-node [text] (.createTextNode js/document text))
 
