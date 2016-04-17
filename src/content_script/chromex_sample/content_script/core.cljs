@@ -9,15 +9,8 @@
                                    dispatch
                                    subscribe]]))
 
-(register-sub
- :matches
- (fn [db _]
-   (reaction (:matches @db))))
-
-(register-sub
- :started
- (fn [db _]
-   (reaction (:started @db))))
+(register-sub :matches (fn [db _] (reaction (:matches @db))))
+(register-sub :started (fn [db _] (reaction (:started @db))))
 
 (register-handler
  :started
