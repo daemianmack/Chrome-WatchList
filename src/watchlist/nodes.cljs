@@ -1,4 +1,4 @@
-(ns chromex-sample.content-script.nodes
+(ns watchlist.nodes
   (:require [clojure.string :refer [lower-case replace]]))
 
 

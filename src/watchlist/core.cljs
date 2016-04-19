@@ -1,9 +1,9 @@
-(ns chromex-sample.content-script.core
+(ns watchlist.core
   (:require-macros [reagent.ratom :refer [reaction]]
-                   [content-script.chromex-sample.content-script.macros :refer [inspect]])
+                   [watchlist.macros :refer [inspect]])
   (:require [reagent.core :as reagent]
             [goog.dom]
-            [chromex-sample.content-script.nodes :as nodes]
+            [watchlist.nodes :as nodes]
             [re-frame.core :refer [register-handler
                                    register-sub
                                    dispatch
@@ -75,3 +75,4 @@
                      app-root (.createDom goog.dom "div" attrs)]
                  (.appendChild (.querySelector js/document "body") app-root)
                  (reagent/render [statusbar] app-root)))))))
+

@@ -1,4 +1,4 @@
-(ns content-script.chromex-sample.content-script.macros)
+(ns watchlist.macros)
 
 
 (defn- inspect-1 [expr]
