@@ -23,17 +23,20 @@
    (let [matches (nodes/highlight-matches! (:terms option-data))]
      (assoc db :matches matches))))
 
+(defn mod-clicks-over-nodes
+  [{:keys [term index] :as clicks} term-clicked nodes]
+  (if (= term-clicked term)
+    (mod (inc index) (count nodes))
+    0))
+
 (register-handler
  :clicked
  (fn [{:keys [clicks matches] :as db} [_ term-clicked]]
-   (let [streak (if (= term-clicked (:term clicks))
-                  (inc (:streak clicks))
-                  0)
-         matches (filter #(= term-clicked (:term %)) matches)
-         node (:node (nth matches (mod streak (count matches))))]
-     (nodes/scroll-to-node! node)
+   (let [term-nodes (filter #(= term-clicked (:term %)) matches)
+         index (mod-clicks-over-nodes clicks term-clicked term-nodes)]
+     (nodes/scroll-to-node! (:node (nth term-nodes index)))
      (merge db {:clicks {:term term-clicked
-                         :streak streak}}))))
+                         :index index}}))))
 
 (defn display-match [group-term hits started]
   (let [this (reagent/current-component)]
