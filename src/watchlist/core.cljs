@@ -64,15 +64,12 @@
             (re-find (re-pattern blacklist)
                      (.-URL js/document)))))
 
-(defn ^:export init! []
+(defn ^:export init! [options]
   (dispatch [:started])
-  (.get js/chrome.storage.sync "watchlist"
-        #(when-let [options-data (:watchlist (js->clj % :keywordize-keys true))]
-           (dispatch [:initialize options-data])
-           (let [{:keys [terms blacklist]} options-data]
-             (when (and terms (url-allowed? blacklist))
-               (let [attrs (clj->js {"className" "watchlist-wrapper"})
-                     app-root (.createDom goog.dom "div" attrs)]
-                 (.appendChild (.querySelector js/document "body") app-root)
-                 (reagent/render [statusbar] app-root)))))))
-
+  (dispatch [:initialize options])
+  (let [{:keys [terms blacklist]} options]
+    (when (and terms (url-allowed? blacklist))
+      (let [attrs (clj->js {"className" "watchlist-wrapper"})
+            app-root (.createDom goog.dom "div" attrs)]
+        (.appendChild (.querySelector js/document "body") app-root)
+        (reagent/render [statusbar] app-root)))))
