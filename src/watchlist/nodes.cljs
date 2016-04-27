@@ -28,6 +28,13 @@
     (conj matches (text (subs s start end)))
     matches))
 
+;; Flaw in this approach: information can be lost when attempting to
+;; use the result of a regex match as a regex itself. Example:
+;; - Original regex "ce\." is an attempt to match a literal trailing period.
+;; - This produces a match of "ce." which enters this function as `term`.
+;; - This is then used as the base for a new regex which will naively
+;;   treat that dot as a metacharacter and produce false positives
+;;   when tested against the URL.
 (defn url-contains-term?
   [url [term]]
   (re-find (re-pattern (str "(?i)" term)) url))
