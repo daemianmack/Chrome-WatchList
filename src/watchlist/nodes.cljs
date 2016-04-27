@@ -80,10 +80,32 @@
     (.insertBefore parent (:node new-node) old-node))
   (.removeChild (.-parentNode old-node) old-node))
 
+(defn parent-is-visible?
+  [parent]
+  (not= 0
+        (.-offsetWidth parent)
+        (.-offsetHeight parent)
+        (.-length (.getClientRects parent))))
+
+(defn parent-can-contain-markup?
+  [parent]
+  (not (contains? #{"SCRIPT" "NOSCRIPT" "TEXTAREA"} (.-tagName parent))))
+
+(defn node-is-regex-match? [regex node]
+  (re-find regex (.-textContent node)))
+
+;; This seems to perform somewhat faster than using an equivalent
+;; NodeFilter in the upstream TreeWalker.
+(defn qualifying-node [regex node]
+  (let [parent (.-parentNode node)]
+    (and (node-is-regex-match? regex node)
+         (parent-can-contain-markup? parent)
+         (parent-is-visible? parent))))
+
 (defn highlight-matches!
   [terms]
   (let [regex (js/RegExp. terms "gi")
-        matching-texts (filterv #(re-find regex (.-textContent %)) (text-objs))
+        matching-texts (filterv (partial qualifying-node regex) (text-objs))
         new-nodes (for [old-node matching-texts
                         :let [new-node-descs (mark-matches regex (.-textContent old-node))
                               new-node-seq   (map mk-node new-node-descs)
