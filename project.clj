@@ -4,34 +4,40 @@
                  [reagent  "0.5.1"]
                  [re-frame "0.7.0"]]
 
-  :plugins [[lein-cljsbuild "1.1.1"]]
+  :plugins [[lein-cljsbuild "1.1.1"]
+            [lein-shell "0.4.2"]]
 
   :source-paths []
 
-  :clean-targets ^{:protect false} ["target"
-                                    "resources/unpacked/compiled"
-                                    "resources/test/compiled"]
+  :clean-targets ["builds"]
 
   :cljsbuild {:builds
-              {:watchlist {:source-paths ["src/watchlist" "src/extension"]
-                           :compiler     {:output-to             "resources/unpacked/compiled/watchlist.js"
-                                          :output-dir            "resources/unpacked/compiled/watchlist"
-                                          :asset-path            "compiled/watchlist"
-                                          :optimizations         :whitespace
-                                          :main                  "extension.chrome"
-                                          :anon-fn-naming-policy :unmapped
-                                          :pretty-print          true
-                                          :compiler-stats        true
-                                          :cache-analysis        true
-                                          :source-map            "resources/unpacked/compiled/watchlist.js.map"
-                                          :source-map-timestamp  true}}
-               :test {:source-paths ["src/watchlist" "test"]
-                      :notify-command ["phantomjs" "phantom/runner.js" "resources/index.html"]
-                      :compiler     {:output-to             "resources/test/compiled/watchlist.js"
-                                     :output-dir            "resources/test/compiled/watchlist"
-                                     :optimizations         :whitespace}}}}
+              {:dev {:source-paths ["src/watchlist" "src/extension"]
+                     :compiler     {:output-to             "builds/dev/compiled/watchlist.js"
+                                    :output-dir            "builds/dev/compiled/watchlist"
+                                    :asset-path            "compiled/watchlist"
+                                    :optimizations         :whitespace
+                                    :main                  "extension.chrome"
+                                    :anon-fn-naming-policy :unmapped
+                                    :pretty-print          true
+                                    :cache-analysis        true
+                                    :source-map            "builds/dev/compiled/watchlist.js.map"
+                                    :source-map-timestamp  true}}
 
-  :aliases {"dev"     ["cljsbuild" "auto" "watchlist"]
-            "release" ["do" "clean," "cljsbuild" "once" "watchlist"]
-            "test"    ["do" "clean," "cljsbuild" "auto" "test"]
-            "package" ["shell" "scripts/package.sh"]})
+               :test {:source-paths   ["src/watchlist" "test"]
+                      :compiler       {:output-to     "builds/test/compiled/watchlist.js"
+                                       :output-dir    "builds/test/compiled/watchlist"
+                                       :optimizations :whitespace}
+                      :notify-command ["phantomjs" "phantom/runner.js" "resources/index.html"]}
+
+               :prod {:source-paths ["src/watchlist" "src/extension"]
+                      :compiler     {:output-to     "builds/prod/compiled/watchlist.js"
+                                     :output-dir    "builds/prod/compiled/watchlist"
+                                     :asset-path    "compiled/watchlist"
+                                     :optimizations :advanced
+                                     :externs       ["resources/externs.js"]}}}}
+
+  :aliases {"dev"      ["do" "clean," "shell" "scripts/insert_assets.sh" "builds/dev," "cljsbuild" "auto" "dev"]
+            "autotest" ["do" "clean," "cljsbuild" "auto" "test"]
+            "prod"     ["do" "clean," "shell" "scripts/insert_assets.sh" "builds/prod," "cljsbuild" "once" "prod"]
+            "package"  ["shell" "scripts/package.sh"]})
