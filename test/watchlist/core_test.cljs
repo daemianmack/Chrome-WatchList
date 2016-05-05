@@ -24,6 +24,12 @@
       (is (= [{:html "Yo"} {:text "u were eaten by a gr"} {:html "ue"}]
              (mark "yo|ue"))))))
 
+(deftest url-allowed-test
+  (testing "Match appears in URL and is thus ignored"
+    (is (= [{:text "This string contains the word resources"}]
+           (nodes/mark-matches (js/RegExp. "resources" "gi")
+                               "This string contains the word resources")))))
+
 (deftest mod-clicks-over-nodes-test
   (let [three-fake-nodes [{} {} {}]
         click (fn [nth clicked-term old-term]
