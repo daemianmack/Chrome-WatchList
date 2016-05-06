@@ -24,10 +24,10 @@
                                     :source-map            "builds/dev/compiled/watchlist.js.map"
                                     :source-map-timestamp  true}}
 
-               :test {:source-paths   ["src/watchlist" "test"]
-                      :compiler       {:output-to     "builds/test/compiled/watchlist.js"
-                                       :output-dir    "builds/test/compiled/watchlist"
-                                       :optimizations :whitespace}
+               :test {:source-paths ["src/watchlist" "test"]
+                      :compiler     {:output-to     "builds/test/compiled/watchlist.js"
+                                     :output-dir    "builds/test/compiled/watchlist"
+                                     :optimizations :whitespace}
                       :notify-command ["phantomjs" "phantom/runner.js" "resources/index.html"]}
 
                :prod {:source-paths ["src/watchlist" "src/extension"]
@@ -38,6 +38,6 @@
                                      :externs       ["resources/externs.js"]}}}}
 
   :aliases {"dev"      ["do" "clean," "shell" "scripts/insert_assets.sh" "builds/dev," "cljsbuild" "auto" "dev"]
-            "autotest" ["do" "clean," "cljsbuild" "auto" "test"]
+            "autotest" ["do" "clean," "cljsbuild" "auto" "test" "dev"]
             "prod"     ["do" "clean," "shell" "scripts/insert_assets.sh" "builds/prod," "cljsbuild" "once" "prod"]
             "package"  ["shell" "scripts/package.sh"]})
