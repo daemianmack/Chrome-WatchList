@@ -15,7 +15,7 @@
       textarea {
           background-color:#eef;
           width:40em;
-          height:20em;
+          height:10em;
           border: 1px solid #ddd;
       }
       #status {
@@ -27,13 +27,9 @@
   </head>
 
   <body>
-    <h2>WatchList</h2>
-    <h3>Use Javascript-compatible regexes. Newlines will be considered ORs ("|").</h3>
-
     <div class="form">
-
       <section>
-        <label for="watchlist_term_input">Highlight any of the following terms:</label>
+        <label for="watchlist_term_input">Highlight any of the following words and Javascript-compatible regexes:</label>
 <textarea id="watchlist_term_input">
 [a-z_]*sandwich
 monkey-4\d
@@ -41,8 +37,8 @@ monkey-4\d
       </section>
 
       <section>
-        <label for="watchlist_blacklist_input">Do not highlight terms
-          if any of the following entries match the current URL:
+        <label for="watchlist_blacklist_input">Do not highlight words
+          if the current URL matches any of the following entries:
         </label>
 <textarea id="watchlist_blacklist_input">
 twitter.com
