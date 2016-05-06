@@ -18,7 +18,7 @@ It uses Chrome's sync API for Storage so your options are persistent across all 
 
 # Installation
 
-Watchlist is available in the usual manner via the Chrome webstore. 
+Watchlist is available in the usual manner [via the Chrome webstore](https://chrome.google.com/webstore/detail/watchlist/menehddibpdfhbfgfmhkddgbajijoole?hl=en-US&gl=US). 
 
 
 
