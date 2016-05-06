@@ -28,7 +28,7 @@
                       :compiler     {:output-to     "builds/test/compiled/watchlist.js"
                                      :output-dir    "builds/test/compiled/watchlist"
                                      :optimizations :whitespace}
-                      :notify-command ["phantomjs" "phantom/runner.js" "resources/index.html"]}
+                      :notify-command ["phantomjs" "phantom/runner.js" "resources/testing/index.html"]}
 
                :prod {:source-paths ["src/watchlist" "src/extension"]
                       :compiler     {:output-to     "builds/prod/compiled/watchlist.js"
