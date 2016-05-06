@@ -37,7 +37,7 @@
                                      :optimizations :advanced
                                      :externs       ["resources/externs.js"]}}}}
 
-  :aliases {"dev"      ["do" "clean," "shell" "scripts/insert_assets.sh" "builds/dev," "cljsbuild" "auto" "dev"]
-            "autotest" ["do" "clean," "cljsbuild" "auto" "test" "dev"]
+  :aliases {"dev"      ["do" "clean," "shell" "scripts/insert_assets.sh" "builds/dev,"  "cljsbuild" "auto" "dev"]
             "prod"     ["do" "clean," "shell" "scripts/insert_assets.sh" "builds/prod," "cljsbuild" "once" "prod"]
+            "autotest" ["do" "clean," "cljsbuild" "auto" "test" "dev"]
             "package"  ["shell" "scripts/package.sh"]})
