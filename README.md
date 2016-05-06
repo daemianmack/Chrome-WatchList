@@ -10,6 +10,12 @@ It uses Chrome's sync API for Storage so your options are persistent across all 
 
 
 
+# Pictures > Words
+
+![demo.gif](https://raw.githubusercontent.com/daemianmack/Chrome-WatchList/master/resources/doc/demo.gif)
+
+
+
 # Installation
 
 Watchlist is available in the usual manner via the Chrome webstore. 
