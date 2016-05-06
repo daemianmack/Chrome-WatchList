@@ -1,4 +1,4 @@
-(defproject watchlist "0.2.0"
+(defproject watchlist "0.5.0"
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.7.228"]
                  [reagent  "0.5.1"]
