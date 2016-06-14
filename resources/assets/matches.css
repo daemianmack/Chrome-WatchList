@@ -1,5 +1,6 @@
 #watchlist-status-bar {
   font-size: 9pt;
+  line-height: 1;
   height: 18px;
   border-top: 1px solid silver;
   border-left: 1px solid silver;
