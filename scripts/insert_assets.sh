@@ -7,6 +7,11 @@ BUILD_DIR="$1"
 
 cd "$(dirname "${BASH_SOURCE[0]}")"; cd ..
 
+if [ -z "$1" ] ; then
+    echo "Usage: $0 <DESTINATION_DIRECTORY>"
+    exit 1
+fi
+
 if [ ! -d "$BUILD_DIR" ] ; then
     mkdir -p "$BUILD_DIR"
 fi
