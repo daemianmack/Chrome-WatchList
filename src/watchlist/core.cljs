@@ -56,8 +56,7 @@
     (fn []
       (when (seq @matches)
         [:div {:id "watchlist-status-bar" :class "watchlist-emphasized"}
-         [:span {:class "watchlist-status-bar-item"} "Watchlist"]
-         [:span {:class "watchlist-status-bar-separator"}]
+         [:span {:class "watchlist-status-bar-item" :id "watchlist-title"} "Watchlist"]
          (doall
           (for [[group-term hits] (sort-by key (group-by :term @matches))]
             ^{:key group-term} [display-match group-term hits @started]))]))))

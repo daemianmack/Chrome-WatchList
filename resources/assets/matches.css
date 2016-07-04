@@ -1,7 +1,7 @@
 #watchlist-status-bar {
-  font-size: 9pt;
+  box-sizing: content-box;
+  font-size: 10px;
   line-height: 1;
-  height: 18px;
   border-top: 1px solid silver;
   border-left: 1px solid silver;
   color: black;
@@ -9,34 +9,31 @@
   bottom: 0;
   right: 0;
   z-index: 25000;
-  text-align: right;
   background-color: #ebebeb;
   -webkit-border-top-left-radius: 2px;
+  max-width: 70%;
+}
+
+#watchlist-title {
+  font-weight: bold;
 }
 
 .watchlist-status-bar-item {
-  padding: 0 10px 0 10px;
+  display: inline-block;
+  padding: 0.4em 0.5em 0 0.5em;
   line-height: 1em;
   font-family: verdana;
+  height: 1.4em;
 }
 
 .watchlist-status-bar-count {
   color: #7A9FFF;
-  font-size: 7pt;
-  vertical-align: super;
+  font-size: 0.7em;
+  vertical-align: sub;
 }
 
 .watchlist-item-hover .watchlist-status-bar-count {color: #eeeeee;}
 .watchlist-item-click .watchlist-status-bar-count {color: #333333;}
-
-.watchlist-status-bar-separator {
-  border-left: 1px solid silver;
-  border-right: 1px solid silver;
-  margin: 0 1px;
-  display: inline-block;
-  width: 1px;
-  height: 10px;
-}
 
 .watchlist-highlight {
   background-color: #ffff96;
