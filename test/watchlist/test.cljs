@@ -1,8 +1,8 @@
 (ns watchlist.test
-   (:require [cljs.test :refer-macros [run-tests run-all-tests]]))
+  (:require [cljs.test :refer-macros [run-tests run-all-tests]]
+            [watchlist.core-test]))
 
 (enable-console-print!)
 
 (defn ^:export run []
-  (run-all-tests #"watchlist.*-test")
-  #_(run-tests))
+  (run-all-tests #"watchlist.*-test"))
