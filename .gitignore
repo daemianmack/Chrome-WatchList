@@ -1,4 +1,2 @@
 .lein*
-/resources/release.crx
-/resources/release.pem
-/builds
+/target

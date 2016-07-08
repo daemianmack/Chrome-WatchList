@@ -1,10 +1,10 @@
 # What the
 
-This Chrome extension lets you specify arbitrary terms (regexes too).
+This Chrome extension lets you specify arbitrary terms, including regexes.
 
-When your terms appear on a webpage, they will be highlighted. 
+When your terms match text on a webpage, that text will be highlighted. 
 
-A summary of them will appear in a statusbar, and clicking the terms in the statusbar will scroll the page to the place that term appears.
+A summary of matches will appear in a statusbar at the bottom of the window, and clicking the terms in the statusbar will scroll the page to the place that match appears.
 
 It uses Chrome's sync API for Storage so your options are persistent across all your devices.
 
@@ -39,19 +39,18 @@ First, make sure you've run `lein dev` or `lein prod`, and then in Chrome...
 
 #### Dev build
 
-`lein dev` will start watching the source directories for changes, and will automatically place fresh builds into `builds/dev`. 
-
-The dev build uses `:whitespace` optimization.
+`lein dev` will start watching the source directories for changes, and will automatically place fresh builds into `target/unpacked`. Assets in `resources/assets` will be copied in once at the beginning but will not be monitored for changes; this mode has the shortest cycle time and is sort of the guerilla-mode option.
 
 #### Prod build
 
-Similarly to the dev build, `lein prod` will start watching the source directories for changes, and will automatically place fresh builds into `builds/prod`. 
+`lein prod` will place a fresh production build in `target/prod`. 
 
-The prod build uses `:advanced` optimization.
-
-#### Testing
+#### Test build
 
 `lein autotest` will start watching the source and test directories for changes, automatically re-running the tests with each change.
+
+#### All builds
+`lein chromebuild auto` will conveniently auto-execute all builds, including `test`, and will monitor `resource/assets` for changes; it is not fast, is included mainly for novelty and should be replaced with a small source/asset-monitoring harness integrated into the above builds.
 
 
 
@@ -63,8 +62,3 @@ that's what you get for now.
 Allow grouping of regexes with distinct CSS rules for each group.
 
 Allow control over the CSS that informs the statusbar.
-
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/daemianmack/chrome-watchlist/trend.png)](https://bitdeli.com/free
-"Bitdeli Badge")
