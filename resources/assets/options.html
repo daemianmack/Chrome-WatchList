@@ -2,57 +2,118 @@
 <html>
   <head>
 
+    <link href="foundation-icons.css" rel="stylesheet">
+
     <style type="text/css">
+     body {margin: 0; height: 400px; width:600px;}
+     ul {padding: 0;}
+
+      #tabstrip {
+        background-color: #5074D3;
+        position: absolute;
+        height: 100%;
+        width: 110px;
+      }
+      #main {
+        position: relative;
+        float: right;
+        qqqwidth: calc(100% - 110px);
+        width: 490px;
+      }
+      #tabs li {
+        color: white;
+        font-weight: normal;
+        line-height: 20px;
+        list-style-type: none;
+      }
+     #tabs li p {
+        margin: 4px;
+        width: 92%;
+      }
+     #tabs li:hover p, #tabs li.active p{
+        background-color: #eee;
+        border-radius: 2px;
+        color: #333;
+     }
+     #tabs li:hover em, #tabs li.active em {
+       color: #000;
+     }
+     #tabs li em {
+       float: left;
+       font-size: 14px;
+       text-align: center;
+       width: 30px;
+      }
+      #main div.form {display:none;}
+      #main div.form.active {display:block;}
+
       .form {
           margin: 1em;
       }
       section {
-          margin-bottom: 1em;
+          margin: 4px;
       }
       label {
-          display: block;
+        display: block;
+        font-weight: bold;
+        margin: 4px;
       }
       textarea {
-          background-color:#eef;
-          width:40em;
-          height:10em;
+          background-color: #eef;
+          width: 458px;
+          height:20em;
           border: 1px solid #ddd;
       }
-      #status {
-          color: #333;
-          margin-left: 1em;
+      .status {
+        color: #5074D3;
+        float: right;
+        font-weight: bold;
+        margin: 4px 10px;
       }
+     input[type="button"] {
+       float: right;
+     }
     </style>
 
   </head>
 
   <body>
-    <div class="form">
-      <section>
-        <label for="watchlist_term_input">Highlight any of the following words and Javascript-compatible regexes:</label>
-<textarea id="watchlist_term_input">
-[a-z_]*sandwich
-monkey-4\d
-</textarea>
-      </section>
-
-      <section>
-        <label for="watchlist_blacklist_input">Do not highlight words
-          if the current URL matches any of the following entries:
-        </label>
-<textarea id="watchlist_blacklist_input">
-twitter.com
-google.com
-</textarea>
-      </section>
-
-      <input id="save" type="button" value="Save">
-      <span id="status"></span>
-
+    <div id="tabstrip">
+      <ul id="tabs">
+        <li id="terms-tab" class="active"><em class="fi-page-search"></em><p>Terms</p></li>
+        <li id="blacklist-tab">           <em class="fi-prohibited"></em> <p>Blacklist</p></li>
+      </ul>
     </div>
 
+    <div id="main">
+      <div id="terms-form" class="form active">
+        <section>
+          <label for="terms-input">Highlight any of the following words and Javascript-compatible regexes:</label>
+          <textarea id="terms-input" placeholder="[a-z_]*sandwichmonkey-4\d"></textarea>
+
+          <input id="terms-save" type="button" value="Save terms">
+          <span class="status" id="terms-status"></span>
+
+        </section>
+
+      </div>
+
+      <div id="blacklist-form" class="form">
+        <section>
+          <label for="blacklist-input">
+              Do not highlight words if the current URL matches any of the following entries:
+          </label>
+          <textarea id="blacklist-input" placeholder="twitter.comgoogle.com"></textarea>
+
+          <input id="blacklist-save" type="button" value="Save blacklist">
+          <span class="status" id="blacklist-status"></span>
+
+        </section>
+
+      </div>
+    </div>
+
+    <script src="options.js"></script>
+
   </body>
-
-  <script src="options.js"></script>
-
 </html>
