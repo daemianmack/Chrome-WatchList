@@ -80,12 +80,14 @@
   <body>
     <div id="tabstrip">
       <ul id="tabs">
-        <li id="terms-tab" class="active"><em class="fi-page-search"></em><p>Terms</p></li>
-        <li id="blacklist-tab">           <em class="fi-prohibited"></em> <p>Blacklist</p></li>
+        <li id="terms-tab" class="active"><em class="fi-page-search"/></em><p>Terms</p>    </li>
+        <li id="blacklist-tab">           <em class="fi-prohibited"/> </em><p>Blacklist</p></li>
+        <li id="styles-tab">              <em class="fi-text-color"/> </em><p>Styles</p>   </li>
       </ul>
     </div>
 
     <div id="main">
+
       <div id="terms-form" class="form active">
         <section>
           <label for="terms-input">Highlight any of the following words and Javascript-compatible regexes:</label>
@@ -93,7 +95,6 @@
 
           <input id="terms-save" type="button" value="Save terms">
           <span class="status" id="terms-status"></span>
-
         </section>
 
       </div>
@@ -101,13 +102,25 @@
       <div id="blacklist-form" class="form">
         <section>
           <label for="blacklist-input">
-              Do not highlight words if the current URL matches any of the following entries:
+            Do not highlight words if any of the following entries match the current URL:
           </label>
           <textarea id="blacklist-input" placeholder="twitter.comgoogle.com"></textarea>
 
           <input id="blacklist-save" type="button" value="Save blacklist">
           <span class="status" id="blacklist-status"></span>
+        </section>
+      </div>
 
+      <div id="styles-form" class="form">
+        <section>
+          <label for="styles-input">
+            Control Watchlist's appearance by overriding
+            <a href="matches.css">the default CSS styles</a>.
+          </label>
+          <textarea id="styles-input"></textarea>
+
+          <input id="styles-save" type="button" value="Save styles">
+          <span class="status" id="styles-status"></span>
         </section>
 
       </div>

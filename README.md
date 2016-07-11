@@ -60,5 +60,3 @@ Allow control over regex flags; I want case-insensitive, so
 that's what you get for now.
 
 Allow grouping of regexes with distinct CSS rules for each group.
-
-Allow control over the CSS that informs the statusbar.
