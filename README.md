@@ -2,7 +2,7 @@
 
 This Chrome extension lets you specify arbitrary terms, including regexes.
 
-When your terms match text on a webpage, that text will be highlighted. 
+When your terms match text on a webpage, that text will be highlighted.
 
 A summary of matches will appear in a statusbar at the bottom of the window, and clicking the terms in the statusbar will scroll the page to the place that match appears.
 
@@ -18,7 +18,7 @@ It uses Chrome's sync API for Storage so your options are persistent across all 
 
 # Installation
 
-Watchlist is available in the usual manner [via the Chrome webstore](https://chrome.google.com/webstore/detail/watchlist/menehddibpdfhbfgfmhkddgbajijoole?hl=en-US&gl=US). 
+Watchlist is available in the usual manner [via the Chrome webstore](https://chrome.google.com/webstore/detail/watchlist/menehddibpdfhbfgfmhkddgbajijoole?hl=en-US&gl=US).
 
 
 
@@ -30,10 +30,10 @@ This is a ClojureScript jam. You'll want [lein](http://leiningen.org/).
 
 First, make sure you've run `lein dev` or `lein prod`, and then in Chrome...
 
-1. Wrench thingy > Tools > Extensions. 
+1. Wrench thingy > Tools > Extensions.
 2. Hit "Load unpacked extension..." which you'll only see if you're in
    developer mode.
-3. Locate the downloaded git repo and select `builds/dev`. Click OK. 
+3. Locate the downloaded git repo and select `builds/dev`. Click OK.
 4. Fiddle with the options.
 5. Rejoice in a life *finally* worth living.
 
@@ -43,7 +43,7 @@ First, make sure you've run `lein dev` or `lein prod`, and then in Chrome...
 
 #### Prod build
 
-`lein prod` will place a fresh production build in `target/prod`. 
+`lein prod` will place a fresh production build in `target/prod`.
 
 #### Test build
 
@@ -54,7 +54,7 @@ First, make sure you've run `lein dev` or `lein prod`, and then in Chrome...
 
 
 
-# TODO 
+# TODO
 
 Allow control over regex flags; I want case-insensitive, so
 that's what you get for now.
