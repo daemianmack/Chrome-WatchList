@@ -62,7 +62,7 @@
             ^{:key group-term} [display-match group-term hits @started]))]))))
 
 (defn url-allowed? [blacklist]
-  (not (and (some? blacklist)
+  (not (and (not (empty? blacklist))
             (re-find (re-pattern blacklist)
                      (.-URL js/document)))))
 
