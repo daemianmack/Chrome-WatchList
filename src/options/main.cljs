@@ -28,20 +28,15 @@
   (set-html! (str tab-handle "-status")
              (str (upcase tab-handle) " saved.")))
 
-(defn save-options* [tab-handle val-fn]
-  (.get js/chrome.storage.sync "watchlist"
-        (fn [data]
-          (let [data (js->clj data)
-                el   (id->el (str tab-handle "-input"))]
-            (.set js/chrome.storage.sync
-                  (clj->js (assoc-in data ["watchlist" tab-handle]
-                                     (val-fn (.-value el))))
-                  #(update-status tab-handle))))))
+(defn save-options* [tab-handle data]
+  (.set js/chrome.storage.sync
+        (clj->js {tab-handle data})
+        #(update-status tab-handle)))
 
 (defmulti save-options! (fn [tab-handle] tab-handle))
 
 (defmethod save-options! :default [tab-handle]
-  (save-options* tab-handle to-regex))
+  (throw (js/Exception (str "Unknown option key " tab-handle))))
 
 (defn populated-inputs [root]
   (let [filter-fn (fn [node]
@@ -59,40 +54,47 @@
          (partition-all 2))))
 
 (defmethod save-options! "terms" [tab-handle]
-  (.get js/chrome.storage.sync "watchlist"
-        (fn [data]
-          (let [data (js->clj data)
-                final (reduce
-                       (fn [acc [category terms]]
-                         (merge-with #(str %1 "|" %2)
-                                     acc
-                                     {category (to-regex terms)}))
-                       {}
-                       (populated-inputs (id->el "terms-form")))]
-            (.set js/chrome.storage.sync
-                  (clj->js (assoc-in data ["watchlist" "terms"] final))
-                  #(update-status tab-handle))))))
+  (let [final (reduce
+               (fn [acc [category terms]]
+                 (merge-with #(str %1 "|" %2)
+                             acc
+                             {category (to-regex terms)}))
+               {}
+               (populated-inputs (id->el "terms-form")))]
+    (save-options* tab-handle final)))
+
+(defmethod save-options! "blacklist" [tab-handle]
+  (save-options* tab-handle (-> (str tab-handle "-input")
+                                id->el
+                                .-value
+                                to-regex)))
 
 (defmethod save-options! "styles" [tab-handle]
-  (save-options* tab-handle identity))
+  (save-options* tab-handle (-> (str tab-handle "-input")
+                                id->el
+                                .-value)))
 
 (defmulti fill-in-options! (fn [k v] k))
 
 (defmethod fill-in-options! :default [k v]
   (throw (js/Exception (str "Unknown option key " k))))
 
-(defn clone-template!
-  ([] (clone-template! (gensym) ""))
+(defn clone-template-for! [template category]
+  (let [new-set (doto (.cloneNode template true)
+                  (#(set! (.-id %) (str "terms-" category))))
+        walker  (.createTreeWalker js/document
+                                   new-set
+                                   NodeFilter.SHOW_ELEMENT)]
+    (doseq [el (take-while some? (repeatedly #(.nextNode walker)))]
+      (set! (.-id el) (str (.-id el) "-" category)))
+    new-set))
+
+(defn clone-terms-template!
+  ([] (clone-terms-template! (gensym) ""))
   ([category terms]
-   (let [terms (to-text terms)
+   (let [terms    (to-text terms)
          template (id->el "terms-template")
-         new-set (doto (.cloneNode template true)
-                   (#(set! (.-id %) (str "terms-" category))))
-         walker   (.createTreeWalker js/document
-                                     new-set
-                                     NodeFilter.SHOW_ELEMENT)]
-     (doseq [el (take-while some? (repeatedly #(.nextNode walker)))]
-       (set! (.-id el) (str (.-id el) "-" category)))
+         new-set  (clone-template-for! template category)]
      (.insertBefore (.-parentNode template) new-set (id->el "terms-controls"))
      (when (not-empty terms)
        (set-val!  (str "terms-input-category-" category) category)
@@ -100,7 +102,7 @@
 
 (defmethod fill-in-options! "terms" [_ term-data]
   (doseq [[category terms] (sort term-data)]
-    (clone-template! category terms)))
+    (clone-terms-template! category terms)))
 
 (defmethod fill-in-options! "blacklist" [_ blacklist]
   (when blacklist (set-val! "blacklist-input" (to-text blacklist))))
@@ -108,14 +110,25 @@
 (defmethod fill-in-options! "styles" [_ styles]
   (when styles (set-val! "styles-input" styles)))
 
+(defn apply-backward-compatibility [data]
+  "0.6.0 simplified the data structure used to save options by
+  removing a redundant top-level 'watchlist' key."
+  (if-let [older-version-data (get data "watchlist")]
+    (do (.remove js/chrome.storage.sync "watchlist"
+                 (.set js/chrome.storage.sync
+                       (clj->js older-version-data)
+                       #(.log js/console "Ported Watchlist extension storage to 0.6.0 format.")))
+        older-version-data)
+    data))
+
 (defn apply-defaults [data]
-  (let [options (get data "watchlist")]
+  (let [options (apply-backward-compatibility data)]
     (if (get options "terms")
       options
       (assoc-in options ["terms" "default"] ""))))
 
 (defn retrieve-options! []
-  (.get js/chrome.storage.sync "watchlist"
+  (.get js/chrome.storage.sync nil
         (fn [data]
           (doseq [[k v] (apply-defaults (js->clj data))]
             (fill-in-options! k v)))))
@@ -146,7 +159,7 @@
 
 (defn assign-add-term-set-handler! []
   (set! (.-onclick (id->el "terms-add-set"))
-        (fn [e] (clone-template!))))
+        (fn [e] (clone-terms-template!))))
 
 (defn main []
   (retrieve-options!)
