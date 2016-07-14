@@ -43,32 +43,34 @@
 (defmethod save-options! :default [tab-handle]
   (save-options* tab-handle to-regex))
 
+(defn populated-inputs [root]
+  (let [filter-fn (fn [node]
+                    (if (and (contains? #{"text" "textarea"}
+                                        (.-type node))
+                             (not (empty? (.-value node))))
+                      NodeFilter.FILTER_ACCEPT
+                      NodeFilter.FILTER_SKIP))
+        walker (.createTreeWalker js/document
+                                  root
+                                  NodeFilter.SHOW_ELEMENT
+                                  #js {:acceptNode filter-fn})]
+    (->> (take-while some? (repeatedly #(.nextNode walker)))
+         (map #(.-value %))
+         (partition-all 2))))
+
 (defmethod save-options! "terms" [tab-handle]
   (.get js/chrome.storage.sync "watchlist"
         (fn [data]
           (let [data (js->clj data)
-                walker   (.createTreeWalker js/document
-                                            (id->el "terms-form")
-                                            NodeFilter.SHOW_ELEMENT
-                                            #js {:acceptNode
-                                                 (fn [node]
-                                                   (if (contains? #{"text" "textarea"}
-                                                                  (.-type node))
-                                                     NodeFilter.FILTER_ACCEPT
-                                                     NodeFilter.FILTER_SKIP))})
                 final (reduce
                        (fn [acc [category terms]]
                          (merge-with #(str %1 "|" %2)
-                          acc
-                          {category (to-regex terms)}))
+                                     acc
+                                     {category (to-regex terms)}))
                        {}
-                       (filter (comp not-empty second)
-                               (partition-all 2
-                                              (map #(.-value %)
-                                                   (take-while some? (repeatedly #(.nextNode walker)))))))]
+                       (populated-inputs (id->el "terms-form")))]
             (.set js/chrome.storage.sync
-                  (clj->js (assoc-in data ["watchlist" "terms"]
-                                     final))
+                  (clj->js (assoc-in data ["watchlist" "terms"] final))
                   #(update-status tab-handle))))))
 
 (defmethod save-options! "styles" [tab-handle]
@@ -106,7 +108,7 @@
 (defmethod fill-in-options! "styles" [_ styles]
   (when styles (set-val! "styles-input" styles)))
 
-(defn options-with-defaults [data]
+(defn apply-defaults [data]
   (let [options (get data "watchlist")]
     (if (get options "terms")
       options
@@ -115,7 +117,7 @@
 (defn retrieve-options! []
   (.get js/chrome.storage.sync "watchlist"
         (fn [data]
-          (doseq [[k v] (options-with-defaults (js->clj data))]
+          (doseq [[k v] (apply-defaults (js->clj data))]
             (fill-in-options! k v)))))
 
 (def tab-handles  #{"terms" "blacklist" "styles"})
