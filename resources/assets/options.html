@@ -63,7 +63,14 @@
           width: 458px;
           height:20em;
           border: 1px solid #ddd;
-      }
+     }
+     input[type="text"] {
+       background-color: #eef;
+       border: 1px solid #ddd;
+     }
+     #terms-form textarea {
+       height: 10em;
+     }
       .status {
         color: #5074D3;
         float: right;
@@ -72,6 +79,9 @@
       }
      input[type="button"] {
        float: right;
+     }
+     #terms-template {
+       display:none;
      }
     </style>
 
@@ -89,14 +99,18 @@
     <div id="main">
 
       <div id="terms-form" class="form active">
-        <section>
-          <label for="terms-input">Highlight any of the following words and Javascript-compatible regexes:</label>
-          <textarea id="terms-input" placeholder="[a-z_]*sandwichmonkey-4\d"></textarea>
-
-          <input id="terms-save" type="button" value="Save terms">
-          <span class="status" id="terms-status"></span>
+        <h4>Highlight words and Javascript-compatible regexes</h4>
+        <h6>Matched terms will be assigned a CSS class of the associated category</h6>
+        <section id="terms-template">
+          <input id="terms-input-category" type="text" placeholder="category" />
+          <textarea id="terms-input-terms" placeholder="[a-z_]*sandwichmonkey-4\d"></textarea>
         </section>
 
+        <span id="terms-controls">
+          <input id="terms-add-set" type="button" value="Add category">
+          <input id="terms-save" type="button" value="Save terms">
+          <span class="status" id="terms-status"></span>
+        </span>
       </div>
 
       <div id="blacklist-form" class="form">
@@ -105,10 +119,10 @@
             Do not highlight words if any of the following entries match the current URL:
           </label>
           <textarea id="blacklist-input" placeholder="twitter.comgoogle.com"></textarea>
-
-          <input id="blacklist-save" type="button" value="Save blacklist">
-          <span class="status" id="blacklist-status"></span>
         </section>
+
+        <input id="blacklist-save" type="button" value="Save blacklist">
+        <span class="status" id="blacklist-status"></span>
       </div>
 
       <div id="styles-form" class="form">
@@ -118,12 +132,12 @@
             <a href="matches.css">the default CSS styles</a>.
           </label>
           <textarea id="styles-input"></textarea>
-
-          <input id="styles-save" type="button" value="Save styles">
-          <span class="status" id="styles-status"></span>
         </section>
 
+        <input id="styles-save" type="button" value="Save styles">
+        <span class="status" id="styles-status"></span>
       </div>
+
     </div>
 
     <script src="options.js"></script>

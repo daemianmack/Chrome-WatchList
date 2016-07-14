@@ -1,6 +1,8 @@
 (ns watchlist.nodes
-  (:require [clojure.string :refer [lower-case replace]]))
+  (:require [clojure.string :refer [lower-case replace]]
+            [cljs.pprint :refer [pprint]]))
 
+(enable-console-print!)
 
 (defn classes+ [node class] (str (.-className node) " " class))
 (defn classes- [node class] (replace (.-className node) (str " " class) ""))
@@ -49,29 +51,29 @@
 
 (defn mark-matches
   [regex s]
-  (reduce 
+  (reduce
    (fn [{:keys [matches prev-idx] :as acc} [term _ :as match]]
      (if term
        (-> acc
            (update :matches text-gap s prev-idx (.-index match))
            (update :matches conj (html term))
            (assoc  :prev-idx (+ (.-index match) (count term))))
-       (reduced (text-gap matches s prev-idx (count s))))) 
-   {:matches [] :prev-idx 0} 
+       (reduced (text-gap matches s prev-idx (count s)))))
+   {:matches [] :prev-idx 0}
    (remove non-nils-in-url (repeatedly #(.exec regex s)))))
 
 (defn mk-text-node [text] (.createTextNode js/document text))
 
-(defn mk-mark-node [text]
+(defn mk-mark-node [text group]
   (.createDom goog.dom "mark"
-              (clj->js {:class "watchlist-highlight"})
+              (clj->js {:class (str "watchlist-highlight " (name group))})
               (mk-text-node text)))
 
 (defn mk-node
-  [{:keys [text html] :as node-desc}]
+  [group {:keys [text html] :as node-desc}]
   (cond-> node-desc
     text (assoc :node (mk-text-node text))
-    html (assoc :node (mk-mark-node html))))
+    html (assoc :node (mk-mark-node html group))))
 
 (defn swap-in-nodes!
   [old-node new-nodes]
@@ -103,16 +105,20 @@
          (parent-is-visible? parent))))
 
 (defn highlight-matches!
-  [terms]
-  (let [regex (js/RegExp. terms "gi")
-        matching-texts (filterv (partial qualifying-node regex) (text-objs))
-        new-nodes (for [old-node matching-texts
-                        :let [new-node-descs (mark-matches regex (.-textContent old-node))
-                              new-node-seq   (map mk-node new-node-descs)
-                              _ (swap-in-nodes! old-node new-node-seq)]
-                        mark (filter :html new-node-seq)]
-                    {:term (lower-case (:html mark)) :node (:node mark)})]
-    new-nodes))
+  [term-data]
+  (mapcat
+   (fn [[group terms]]
+     (let [regex (js/RegExp. terms "gi")
+           matching-texts (filterv (partial qualifying-node regex) (text-objs))
+           new-nodes (doall
+                      (for [old-node matching-texts
+                            :let [new-node-descs (mark-matches regex (.-textContent old-node))
+                                  new-node-seq   (map (partial mk-node group) new-node-descs)
+                                  _ (swap-in-nodes! old-node new-node-seq)]
+                            mark (filter :html new-node-seq)]
+                        {:term (lower-case (:html mark)) :node (:node mark) :group group}))]
+       new-nodes))
+   term-data))
 
 
 (defn ancestors-of [node]

@@ -40,7 +40,8 @@
 
 (defn display-match [group-term hits started]
   (let [this (reagent/current-component)]
-    [:span {:class "watchlist-status-bar-item"
+    [:span {:class (str "watchlist-status-bar-item "
+                        (-> hits first :group name))
             :on-mouse-over (nodes/evt nodes/add-class this "watchlist-item-hover")
             :on-mouse-out  (nodes/evt nodes/del-class this "watchlist-item-hover")
             :on-mouse-down (nodes/evt nodes/add-class this "watchlist-item-click")
