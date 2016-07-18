@@ -1,6 +1,5 @@
 (ns watchlist.core
-  (:require-macros [reagent.ratom :refer [reaction]]
-                   [watchlist.macros :refer [inspect]])
+  (:require-macros [reagent.ratom :refer [reaction]])
   (:require [reagent.core :as reagent]
             [goog.dom]
             [watchlist.nodes :as nodes]
