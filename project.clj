@@ -26,7 +26,6 @@
                          :compiler     {:output-to             "target/unpacked/options.js"
                                         :output-dir            "target/unpacked/options"
                                         :optimizations         :whitespace
-                                        :main                  "options.ui/main"
                                         :anon-fn-naming-policy :unmapped
                                         :pretty-print          true
                                         :cache-analysis        true
