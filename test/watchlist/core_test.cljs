@@ -1,7 +1,14 @@
 (ns watchlist.core-test
-  (:require [cljs.test :refer-macros [deftest is testing]]
+  (:require [cljs.test :refer-macros [deftest is testing use-fixtures]]
             [watchlist.core :as core]
-            [watchlist.nodes :as nodes]))
+            [watchlist.nodes :as nodes]
+            [watchlist.test-helpers :as th]))
+
+
+(use-fixtures :each th/fresh-sandbox!)
+
+
+(enable-console-print!)
 
 (deftest mark-matches-test
   (let [string "You were eaten by a grue"
@@ -42,3 +49,38 @@
    (is (= 2 (click 1 "grue" "grue")))
    (is (= 0 (click 2 "grue" "grue")))
    (is (= 0 (click 1 "grue" "cave")))))
+
+(deftest highlight-matches!-no-matches
+  (th/assert-matches
+   {"animals" "shark"}
+   "one ring to rule them all"
+   "one ring to find them"
+   "one ring to bring them all and in the darkness bind them."))
+
+(deftest highlight-matches!-single-category
+  (th/assert-matches
+   {"numbers" "one"}
+   "~one!numbers~ ring to rule them all"
+   "~one!numbers~ ring to find them"
+   "~one!numbers~ ring to bring them all and in the darkness bind them."))
+
+(deftest highlight-matches!-single-category-regex
+  (th/assert-matches
+   {"nouns" "ring|darkness"}
+   "one ~ring!nouns~ to rule them all"
+   "one ~ring!nouns~ to find them"
+   "one ~ring!nouns~ to b~ring!nouns~ them all and in the ~darkness!nouns~ bind them."))
+
+(deftest highlight-matches!-multiple-categories
+  (th/assert-matches
+   {"nouns" "ring|darkness" "errbody" "them\\ all"}
+   "one ~ring!nouns~ to rule ~them all!errbody~"
+   "one ~ring!nouns~ to find them"
+   "one ~ring!nouns~ to b~ring!nouns~ ~them all!errbody~ and in the ~darkness!nouns~ bind them."))
+
+(deftest highlight-matches!-multiple-categories-extra-regex
+  (th/assert-matches
+   {"nouns" "ring|darkness" "stems" "them?|all|[a-z]ind"}
+   "one ~ring!nouns~ to rule ~them!stems~ ~all!stems~"
+   "one ~ring!nouns~ to ~find!stems~ ~them!stems~"
+   "one ~ring!nouns~ to b~ring!nouns~ ~them!stems~ ~all!stems~ and in ~the!stems~ ~darkness!nouns~ ~bind!stems~ ~them!stems~."))
