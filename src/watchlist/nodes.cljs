@@ -109,7 +109,7 @@
   (mapcat
    (fn [[group terms]]
      (let [regex (js/RegExp. terms "gi")
-           matching-texts (filterv (partial qualifying-node regex) (text-objs))
+           matching-texts (filterv (partial qualifying-node (js/RegExp. terms "i")) (text-objs))
            new-nodes (doall
                       (for [old-node matching-texts
                             :let [new-node-descs (mark-matches regex (.-textContent old-node))
