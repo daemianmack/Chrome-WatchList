@@ -106,8 +106,8 @@
 
 (defn highlight-matches!
   [term-data]
-  (mapcat
-   (fn [[group terms]]
+  (reduce-kv
+   (fn [acc group terms]
      (let [regex (js/RegExp. terms "gi")
            matching-texts (filterv (partial qualifying-node (js/RegExp. terms "i")) (text-objs))
            new-nodes (doall
@@ -117,9 +117,9 @@
                                   _ (swap-in-nodes! old-node new-node-seq)]
                             mark (filter :html new-node-seq)]
                         {:term (lower-case (:html mark)) :node (:node mark) :group group}))]
-       new-nodes))
+       (into acc new-nodes)))
+   []
    term-data))
-
 
 (defn ancestors-of [node]
   (take-while some? (iterate #(.-offsetParent %) (.-parentNode node))))
