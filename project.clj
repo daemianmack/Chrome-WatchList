@@ -8,7 +8,8 @@
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-shell "0.4.2"]
-            [lein-chromebuild "0.3.0"]]
+            [lein-chromebuild "0.3.0"]
+            [lein-doo "0.1.7"]]
 
   :source-paths ["src/watchlist" "src/extension" "src/options"]
 
@@ -43,8 +44,8 @@
                :test {:source-paths ["src/watchlist" "test"]
                       :compiler     {:output-to     "target/test/watchlist.js"
                                      :output-dir    "target/test/watchlist"
-                                     :optimizations :whitespace}
-                      :notify-command ["phantomjs" "phantom/runner.js" "resources/testing/index.html"]}
+                                     :optimizations :none
+                                     :main watchlist.test}}
 
                :prod {:source-paths ["src/watchlist" "src/extension"]
                       :compiler     {:output-to     "target/prod/watchlist.js"
@@ -60,5 +61,4 @@
                         "cljsbuild" "auto" "dev" "options"]
             "prod"     ["do" "clean,"
                         "cljsbuild" "once" "prod" "options-prod,"
-                        "shell" "scripts/package.sh"]
-            "autotest" ["do" "clean," "cljsbuild" "auto" "test"]})
+                        "shell" "scripts/package.sh"]})
