@@ -136,11 +136,8 @@
 (def tab-handles  #{"terms" "blacklist" "styles"})
 (def tab-suffixes #{"-tab" "-form"})
 
-(defn classes+ [node class] (str     (.-className node) " " class))
-(defn classes- [node class] (replace (.-className node) class ""))
-
-(defn add-class! [node class] (set! (.-className node) (classes+ node class)))
-(defn del-class! [node class] (set! (.-className node) (classes- node class)))
+(defn add-class [node class] (.add    (.-classList node) class))
+(defn del-class [node class] (.remove (.-classList node) class))
 
 (defn assign-click-handlers! []
   (doseq [handle tab-handles]

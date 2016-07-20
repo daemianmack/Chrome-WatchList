@@ -85,3 +85,35 @@
    "one ~ring!nouns~ to rule ~them!stems~ ~all!stems~"
    "one ~ring!nouns~ to ~find!stems~ ~them!stems~"
    "one ~ring!nouns~ to b~ring!nouns~ ~them!stems~ ~all!stems~ and in ~the!stems~ ~darkness!nouns~ ~bind!stems~ ~them!stems~."))
+
+(deftest highlight-matches!-multiple-categories-extra-regex-2
+  (th/assert-matches
+   {"random" "one|to\\ ....\\ ...."}
+   "~one!random~ ring ~to rule them!random~ all"
+   "~one!random~ ring ~to find them!random~"
+   "~one!random~ ring to bring them all and in the darkness bind them."))
+
+(deftest highlight-matches!-overlapping-categories
+  (th/assert-matches
+   {"verbs" "ring|rule" "nouns" "ring"}
+   "one ~ring!nouns!verbs~ to ~rule!verbs~ them all"
+   "one ~ring!nouns!verbs~ to find them"
+   "one ~ring!nouns!verbs~ to b~ring!nouns!verbs~ them all and in the darkness bind them."))
+
+
+(deftest highlight-matches!-overlapping-categories-preserves-pre-existing-marks
+  (th/assert-matches
+   {"verbs" "ring|rule" "nouns" "ring"}
+   "one ~ring!nouns!verbs~ to ~rule!verbs~ them all"
+   "one ~ring!nouns!verbs~ to find them"
+   "one ~ring!nouns!verbs~ to b~ring!nouns!verbs~ them all and in the darkness bind them."
+   "-- <mark class=\"pre-existing\">Gary Busey</mark>, Keep On Keepin' On"))
+
+(deftest highlight-matches!-overlapping-categories-nests-within-pre-existing-marks
+  (th/assert-matches
+   {"verbs" "ring|rule" "nouns" "ring" "people" "busey"}
+   "one ~ring!nouns!verbs~ to ~rule!verbs~ them all"
+   "one ~ring!nouns!verbs~ to find them"
+   "one ~ring!nouns!verbs~ to b~ring!nouns!verbs~ them all and in the darkness bind them."
+   "-- <mark class=\"pre-existing\">Gary <mark class=\"people watchlist-highlight\">Busey</mark></mark>, Keep On Keepin' On"))
+

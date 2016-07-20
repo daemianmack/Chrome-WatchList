@@ -1,14 +1,12 @@
 (ns watchlist.nodes
-  (:require [clojure.string :refer [lower-case replace]]
+  (:require [clojure.string :refer [lower-case replace join split]]
+            [clojure.set :refer [union]]
             [cljs.pprint :refer [pprint]]))
 
 (enable-console-print!)
 
-(defn classes+ [node class] (str (.-className node) " " class))
-(defn classes- [node class] (replace (.-className node) (str " " class) ""))
-
-(defn add-class [node class] (set! (.-className node) (classes+ node class)))
-(defn del-class [node class] (set! (.-className node) (classes- node class)))
+(defn add-class [node class] (.add    (.-classList node) class))
+(defn del-class [node class] (.remove (.-classList node) class))
 
 (defn evt [mod-fn node class]
   (fn [e]
@@ -65,9 +63,10 @@
 (defn mk-text-node [text] (.createTextNode js/document text))
 
 (defn mk-mark-node [text group]
-  (.createDom goog.dom "mark"
-              (clj->js {:class (str "watchlist-highlight " (name group))})
-              (mk-text-node text)))
+  (let [node (.createDom goog.dom "mark" nil (mk-text-node text))]
+    (doseq [class (sort ["watchlist-highlight" (name group)])]
+      (add-class node class))
+    node))
 
 (defn mk-node
   [group {:keys [text html] :as node-desc}]
@@ -75,12 +74,42 @@
     text (assoc :node (mk-text-node text))
     html (assoc :node (mk-mark-node html group))))
 
+(extend-type js/DOMTokenList
+  ISeqable
+  (-seq [array] (array-seq array 0)))
+
+(defn adopt-classes!
+  [old-node donor-nodes]
+  (let [parent (.-parentNode old-node)
+        new-classes (reduce
+                     (fn [acc node] (into acc (.-classList node)))
+                     #{}
+                     (map :node donor-nodes))
+        old-classes (set (.-classList parent))]
+    ;; Wipe out existing classes so we can add all classes in predictable order.
+    (doseq [class old-classes]
+      (del-class parent class))
+    (doseq [class (sort (union new-classes old-classes))]
+      (add-class parent class))
+    (doseq [node donor-nodes]
+      (set! (.-display (.-style (:node node ))) "none")
+      (.insertBefore parent (:node node) old-node))))
+
+(defn previous-watchlist-mark?
+  [node]
+  (let [parent (.-parentNode node)]
+    (and (= "MARK" (.-tagName parent))
+         (not (neg? (.indexOf (.-className parent)
+                              "watchlist-highlight"))))))
+
 (defn swap-in-nodes!
   [old-node new-nodes]
-  (doseq [new-node new-nodes
-          :let [parent (.-parentNode old-node)]]
-    (.insertBefore parent (:node new-node) old-node))
-  (.removeChild (.-parentNode old-node) old-node))
+  (if (previous-watchlist-mark? old-node)
+    (adopt-classes! old-node new-nodes)
+    (do (let [parent (.-parentNode old-node)]
+          (doseq [new-node new-nodes]
+            (.insertBefore parent (:node new-node) old-node))
+          (.removeChild (.-parentNode old-node) old-node)))))
 
 (defn parent-is-visible?
   [parent]
@@ -126,8 +155,9 @@
 
 (defn scroll-to-node!
   [node]
-  (let [classes (classes- node "watchlist-emphasized")]
+  (let [classes (replace (.-className node) #"\\s+watchlist-emphasized\\s+" "")]
     (js/setTimeout (fn [] (set! (.-className node) classes)) 500)
     (add-class node "watchlist-emphasized"))
   (set! (.-scrollTop (.querySelector js/document "body"))
         (reduce + 0 (map #(.-offsetTop %) (ancestors-of node)))))
+

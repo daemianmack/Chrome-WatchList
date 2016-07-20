@@ -10,7 +10,10 @@
   [:div#sandbox
    [:div "one ring to rule them all"]
    [:div "one ring to find them"]
-   [:div "one ring to bring them all and in the darkness bind them."]])
+   [:div "one ring to bring them all and in the darkness bind them."]
+   [:div "-- "
+    [:mark.pre-existing "Gary Busey"]
+    ", Keep On Keepin' On"]])
 
 (defn fresh-sandbox! [f]
   (let [sandbox (hipo/create div-sandbox)]
@@ -71,7 +74,7 @@
 (defn flatten-expando [[content & classes]]
   (let [classes (cons "watchlist-highlight" classes)]
     (cl-format nil "<mark class=\"~A\">~A</mark>"
-               (apply str (interpose " " classes))
+               (apply str (interpose " " (sort classes)))
                content)))
 
 (defn expand-class-refs [s]
