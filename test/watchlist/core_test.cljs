@@ -33,10 +33,9 @@
 
 (deftest url-allowed-test
   (testing "Match appears in URL and is thus ignored"
-    (is (= [{:text "This string contains the word debug"}]
+    (is (= [{:text "This string contains the word resources"}]
            (nodes/mark-matches (js/RegExp. "resources" "gi")
-                               "This string contains the word debug")))))
-
+                               "This string contains the word resources")))))
 
 (deftest mod-clicks-over-nodes-test
   (let [three-fake-nodes [{} {} {}]

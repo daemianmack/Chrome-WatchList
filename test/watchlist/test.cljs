@@ -1,7 +1,6 @@
 (ns watchlist.test
-  (:require [doo.runner :refer-macros [doo-tests]]
-            [watchlist.core-test]
-            [watchlist.perf-test]))
+  (:require [cljs.test :refer-macros [run-tests run-all-tests]]
+            [watchlist.core-test]))
 
-(doo-tests 'watchlist.core-test
-           'watchlist.perf-test)
+(defn ^:export run []
+  (run-all-tests #"watchlist.*-test"))
