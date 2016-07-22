@@ -53,11 +53,9 @@
 (defn mk-text-node-x [text] (.createTextNode js/document text))
 
 (defn text-gap-x [matches s start end]
-  (let [ret (if (< start end)
-          (conj matches {:node (mk-text-node-x (subs s start end))})
-          matches)]
-    #_(p :text-gap-x ret)
-    ret))
+  (if (< start end)
+    (conj matches {:node (mk-text-node-x (subs s start end))})
+    matches))
 
 (defn text-gap [matches s start end]
   (if (< start end)
@@ -96,18 +94,33 @@
 
 (declare swap-in-nodes!)
 
+(defn mark-matches-x-reduce
+  [regex-data node]
+  (let [text-content (.-textContent node)
+        regex (.globalize js/XRegExp (:regex regex-data))
+        new-node-descs
+        (reduce
+         (fn [{:keys [prev-idx] :as acc} match-data]
+           (if match-data
+             (let [[category value] (first (for [category (:category-names regex-data)
+                                                 :let [value (goog.object/get match-data category)]
+                                                 :when (not-empty value)]
+                                             [category value]))]
+               (-> acc
+                   (update :matches text-gap-x text-content prev-idx (.-index match-data))
+                   (update :matches conj {:node (mk-node-x category value)
+                                          :term value
+                                          :groups (split category #"\$\$\$")
+                                          :html true})
+                   (assoc :prev-idx (.-lastIndex regex))))
+             (reduced (text-gap-x (:matches acc) text-content prev-idx (count text-content)))))
+         {:matches [] :prev-idx 0}
+         (remove non-nils-in-url (repeatedly #(.exec js/XRegExp text-content regex (.-lastIndex regex)))))]
+    (swap-in-nodes! node new-node-descs)
+    (filter :html new-node-descs)))
+
 (defn mark-matches-x
   [regex-data node]
-  #_(reduce
-     (fn [{:keys [matches prev-idx] :as acc} [term _ :as match]]
-       (if term
-         (-> acc
-             (update :matches text-gap s prev-idx (.-index match))
-             (update :matches conj (html term))
-             (assoc  :prev-idx (+ (.-index match) (count term))))
-         (reduced (text-gap matches s prev-idx (count s)))))
-     {:matches [] :prev-idx 0}
-     (remove non-nils-in-url (repeatedly #(.exec js/XRegExp regex s))))
   (let [text-content (.-textContent node)
         regex (:regex regex-data)
         new-node-descs (loop [pos 0
@@ -192,7 +205,8 @@
     (do (let [parent (.-parentNode old-node)]
           (doseq [new-node new-nodes]
             (.insertBefore parent (:node new-node) old-node))
-          (.removeChild (.-parentNode old-node) old-node)))))
+          (.removeChild parent old-node)))))
+
 
 (defn parent-is-visible?
   [parent]
@@ -207,6 +221,17 @@
 
 (defn node-is-regex-match? [regex node]
   (re-find regex (.-textContent node)))
+
+(defn node-is-regex-match?-x-reduce [regex node]
+  (.test js/XRegExp regex (.-textContent node)))
+
+;; This seems to perform somewhat faster than using an equivalent
+;; NodeFilter in the upstream TreeWalker.
+(defn qualifying-node-x-reduce [regex node]
+  (let [parent (.-parentNode node)]
+    (and (node-is-regex-match? regex node)
+         (parent-can-contain-markup? parent)
+         (parent-is-visible? parent))))
 
 ;; This seems to perform somewhat faster than using an equivalent
 ;; NodeFilter in the upstream TreeWalker.
@@ -255,74 +280,26 @@
                                 (join "$$$" categories)
                                 (join "|"   terms)))
                    term-map)]
-    {:regex (js/XRegExp. (join "|" regex))
+    {:regex (js/XRegExp. (join "|" regex) "i")
      :category-names (map #(join "$$$" %) (keys term-map))}))
 
+(defmethod highlight-matches! :xregexp-reduce
+  [_ term-data]
+  (let [regex-data (->regex-data term-data)
+        matching-texts (filterv (partial qualifying-node-x-reduce (:regex regex-data)) (text-objs))
+        new-nodes (into []
+                        (for [old-node matching-texts]
+                          (mark-matches-x-reduce regex-data old-node)))]
+    new-nodes))
 
 (defmethod highlight-matches! :xregexp
   [_ term-data]
-  #_(reduce
-     (fn [acc term-data]
-       (let [group (first (keys term-data))
-             terms (first (vals term-data))
-             regex (js/RegExp. terms "gi")
-             matching-texts (filterv (partial qualifying-node (js/RegExp. terms "i")) (text-objs))
-             new-nodes (doall
-                        (for [old-node matching-texts
-                              :let [new-node-descs (mark-matches regex (.-textContent old-node))
-                                    new-node-seq   (map (partial mk-node group) new-node-descs)
-                                    _ (swap-in-nodes! old-node new-node-seq)]
-                              mark (filter :html new-node-seq)]
-                          {:term (lower-case (:html mark)) :node (:node mark) :group group}))]
-         (into acc new-nodes)))
-     [])
   (let [regex-data (->regex-data term-data)
-        ;; Nix qualifying-node and just do an acceptNode fn?
         matching-texts (filterv (partial qualifying-node (:regex regex-data)) (text-objs))
-        new-nodes (doall
-                   (for [old-node matching-texts]
-                     (mark-matches-x regex-data old-node)))]
-    (first new-nodes)))
-
-
-(defmethod highlight-matches! :individual-regex
-  [_ term-data]
-  (reduce
-   (fn [acc term-data]
-     (let [group (first (keys term-data))
-           terms (first (vals term-data))
-           regex (js/RegExp. terms "gi")
-           matching-texts (filterv (partial qualifying-node (js/RegExp. terms "i")) (text-objs))
-           new-nodes (doall
-                      (for [old-node matching-texts
-                            :let [new-node-descs (mark-matches regex (.-textContent old-node))
-                                  new-node-seq   (map (partial mk-node group) new-node-descs)
-                                  _ (swap-in-nodes! old-node new-node-seq)]
-                            mark (filter :html new-node-seq)]
-                        {:term (lower-case (:html mark)) :node (:node mark) :group group}))]
-       (into acc new-nodes)))
-   []
-   (for [[k vs] term-data
-         v (split vs #"\|")]
-     {k v})))
-
-(defmethod highlight-matches! :without-preflight-regex-check
-  [_ term-data]
-  (reduce-kv
-   (fn [acc group terms]
-     (let [regex (js/RegExp. terms "gi")
-           is-match? (partial re-find (js/RegExp. terms))
-           matching-texts (filterv qualifying-node-w-p-r-c (text-objs-w-p-r-c is-match?))
-           new-nodes (doall
-                      (for [old-node matching-texts
-                            :let [new-node-descs (mark-matches regex (.-textContent old-node))
-                                  new-node-seq   (map (partial mk-node group) new-node-descs)
-                                  _ (swap-in-nodes! old-node new-node-seq)]
-                            mark (filter :html new-node-seq)]
-                        {:term (lower-case (:html mark)) :node (:node mark) :group group}))]
-       (into acc new-nodes)))
-   []
-   term-data))
+        new-nodes (into []
+                        (for [old-node matching-texts]
+                          (mark-matches-x regex-data old-node)))]
+    new-nodes))
 
 (defmethod highlight-matches! :legacy
   [_ term-data]
