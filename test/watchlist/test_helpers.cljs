@@ -93,7 +93,7 @@
               (rest parsed))))))
 
 (defn assert-matches [match-spec & strs]
-  (highlight-matches! match-spec)
+  (highlight-matches! :legacy match-spec)
   (doall (map
           (fn [regex node]
             (is (re-find regex (.-innerHTML node))))

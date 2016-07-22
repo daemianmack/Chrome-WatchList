@@ -53,14 +53,14 @@
                    s-terms (gen-terms 2)
                    m-terms (gen-terms 4)
                    l-terms (gen-terms 6)]
-              [["sml DOM, 2x2 terms" s-dom s-terms]
-               ["sml DOM, 4x4 terms" s-dom m-terms]
-               ["sml DOM, 6x6 terms" s-dom l-terms]
+               [["sml DOM, 2x2 terms" s-dom s-terms]
+                ["sml DOM, 4x4 terms" s-dom m-terms]
+                ["sml DOM, 6x6 terms" s-dom l-terms]
 
-               ["med DOM, 2x2 terms" m-dom s-terms]
-               ["med DOM, 4x4 terms" m-dom m-terms]
-               ["med DOM, 6x6 terms" m-dom l-terms]
+                ["med DOM, 2x2 terms" m-dom s-terms]
+                ["med DOM, 4x4 terms" m-dom m-terms]
+                ["med DOM, 6x6 terms" m-dom l-terms]
 
-               ["lrg DOM, 2x2 terms" l-dom s-terms]
-               ["lrg DOM, 4x4 terms" l-dom m-terms]
-               ["lrg DOM, 6x6 terms" l-dom l-terms]])))))
+                ["lrg DOM, 2x2 terms" l-dom s-terms]
+                ["lrg DOM, 4x4 terms" l-dom m-terms]
+                ["lrg DOM, 6x6 terms" l-dom l-terms]])))))

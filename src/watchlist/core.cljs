@@ -19,7 +19,7 @@
 (register-handler
  :initialize
  (fn [db [_ option-data]]
-   (let [matches (nodes/highlight-matches! (:terms option-data))]
+   (let [matches (nodes/highlight-matches! :legacy (:terms option-data))]
      (assoc db :matches matches))))
 
 (defn mod-clicks-over-nodes
