@@ -86,59 +86,33 @@
     (every-pred some? url-contains-term?)))
 
 (defn mk-node-x
-  [categories match]
-  (let [node (.createDom goog.dom "mark" nil (mk-text-node-x match))]
-    (doseq [class (sort (into ["watchlist-highlight"] (split categories #"\$\$\$")))]
+  [category match]
+  (let [categories (split category #"\$\$\$")
+        node (.createDom goog.dom "mark" nil (mk-text-node-x match))]
+    (doseq [class (sort (into ["watchlist-highlight"] categories))]
       (add-class node class))
-    node))
+    {:node node
+     :term (lower-case match)
+     :groups categories
+     :html true}))
 
 (declare swap-in-nodes!)
-
-(defn mark-matches-x-reduce
-  [regex-data node]
-  (let [text-content (.-textContent node)
-        regex (.globalize js/XRegExp (:regex regex-data))
-        new-node-descs
-        (reduce
-         (fn [{:keys [prev-idx] :as acc} match-data]
-           (if match-data
-             (let [[category value] (first (for [category (:category-names regex-data)
-                                                 :let [value (goog.object/get match-data category)]
-                                                 :when (not-empty value)]
-                                             [category value]))]
-               (-> acc
-                   (update :matches text-gap-x text-content prev-idx (.-index match-data))
-                   (update :matches conj {:node (mk-node-x category value)
-                                          :term value
-                                          :groups (split category #"\$\$\$")
-                                          :html true})
-                   (assoc :prev-idx (.-lastIndex regex))))
-             (reduced (text-gap-x (:matches acc) text-content prev-idx (count text-content)))))
-         {:matches [] :prev-idx 0}
-         (remove non-nils-in-url (repeatedly #(.exec js/XRegExp text-content regex (.-lastIndex regex)))))]
-    (swap-in-nodes! node new-node-descs)
-    (filter :html new-node-descs)))
 
 (defn mark-matches-x
   [regex-data node]
   (let [text-content (.-textContent node)
         regex (:regex regex-data)
         new-node-descs (loop [pos 0
-                              acc {:matches []}
-                              n 5]
-                         (if-let [o-res (.exec js/XRegExp text-content regex pos)]
-                           (let [res (apply merge-with merge
-                                            (for [name (:category-names regex-data)
-                                                  :let [val (goog.object/get o-res name)]
-                                                  :when (not-empty val)]
-                                              {name val}))
+                              acc {:matches []}]
+                         (if-let [match-data (.exec js/XRegExp text-content regex pos)]
+                           (let [[category value] (first (for [category (:category-names regex-data)
+                                                               :let [value (goog.object/get match-data category)]
+                                                               :when (not-empty value)]
+                                                          [category value]))
                                  acc (-> acc
-                                         (update :matches text-gap-x text-content pos (.-index o-res))
-                                         (update :matches conj {:node (mk-node-x (first (keys res)) (first (vals res)))
-                                                                :term (first (vals res))
-                                                                :groups (split (first (keys res)) #"\$\$\$")
-                                                                :html true}))]
-                             (recur (+ (.-index o-res) (count (first (vals res)))) acc (dec n)))
+                                         (update :matches text-gap-x text-content pos (.-index match-data))
+                                         (update :matches conj (mk-node-x category value)))]
+                             (recur (+ (.-index match-data) (count value)) acc))
                            (text-gap-x (:matches acc) text-content pos (count text-content))))]
     (swap-in-nodes! node new-node-descs)
     (filter :html new-node-descs)))
@@ -243,29 +217,11 @@
 
 (defmulti highlight-matches! (fn [strategy data] strategy))
 
-(defn qualifying-node-w-p-r-c [node]
-  (let [parent (.-parentNode node)]
-    (and (parent-can-contain-markup? parent)
-         (parent-is-visible? parent))))
-
-
 (defn invert-terms [terms]
   (apply merge-with into
          (for [[k vs] terms
                v (split vs #"\|")]
-           {v [k]})))
-
-;; (defn ->regex [terms]
-;;   (let [terms (invert-terms terms)
-;;         term-map (reduce-kv
-;;                   (fn [acc term categories]
-;;                     (conj acc (cl-format "(?<~A>~A)"
-;;                                          (join "$$$" categories)
-;;                                          term)))
-;;                   []
-;;                   terms)]
-;;     {:regex (join "|" term-map)
-;;      :capture-names (map #(join "$$$" %) (vals terms))}))
+           {v [(name k)]})))
 
 (defn ->regex-data [terms]
   (let [terms (invert-terms terms)
@@ -276,30 +232,20 @@
                   {}
                   terms)
         regex (map (fn [[categories terms]]
-                     (cl-format nil "(?<~A>~A)"
-                                (join "$$$" categories)
-                                (join "|"   terms)))
+                     (cl-format nil"(?<~A>~A)"
+                                  (join "$$$" categories)
+                                  (join "|"   terms)))
                    term-map)]
     {:regex (js/XRegExp. (join "|" regex) "i")
      :category-names (map #(join "$$$" %) (keys term-map))}))
 
-(defmethod highlight-matches! :xregexp-reduce
-  [_ term-data]
-  (let [regex-data (->regex-data term-data)
-        matching-texts (filterv (partial qualifying-node-x-reduce (:regex regex-data)) (text-objs))
-        new-nodes (into []
-                        (for [old-node matching-texts]
-                          (mark-matches-x-reduce regex-data old-node)))]
-    new-nodes))
-
 (defmethod highlight-matches! :xregexp
   [_ term-data]
-  (let [regex-data (->regex-data term-data)
-        matching-texts (filterv (partial qualifying-node (:regex regex-data)) (text-objs))
-        new-nodes (into []
-                        (for [old-node matching-texts]
-                          (mark-matches-x regex-data old-node)))]
-    new-nodes))
+  (when term-data
+    (let [regex-data (->regex-data term-data)
+          matching-texts (filterv (partial qualifying-node-x-reduce (:regex regex-data)) (text-objs))
+          new-nodes (reduce #(into %1 (mark-matches-x regex-data %2)) [] matching-texts)]
+      new-nodes)))
 
 (defmethod highlight-matches! :legacy
   [_ term-data]

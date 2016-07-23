@@ -92,8 +92,8 @@
               []
               (rest parsed))))))
 
-(defn assert-matches [match-spec & strs]
-  (highlight-matches! :legacy match-spec)
+(defn assert-matches [k match-spec & strs]
+  (highlight-matches! k match-spec)
   (doall (map
           (fn [regex node]
             (is (re-find regex (.-innerHTML node))))

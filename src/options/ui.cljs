@@ -1,6 +1,7 @@
 (ns options.ui
   (:require [clojure.string :refer [split join replace upper-case]]
-            [cljs.pprint :refer [pprint]]))
+            [cljs.pprint :refer [pprint]]
+            [com.xregexp]))
 
 (enable-console-print!)
 
@@ -145,9 +146,9 @@
           (fn [e]
             (doseq [handle tab-handles
                     suffix tab-suffixes]
-              (del-class! (id->el (str handle suffix)) "active"))
+              (del-class (id->el (str handle suffix)) "active"))
             (doseq [suffix tab-suffixes]
-             (add-class! (id->el (str handle suffix))  "active"))))))
+             (add-class (id->el (str handle suffix))  "active"))))))
 
 (defn save-handlers! []
   (doseq [tab-handle #{"terms" "blacklist" "styles"}]

@@ -22,7 +22,12 @@
                                     :pretty-print          true
                                     :cache-analysis        true
                                     :source-map            "target/unpacked/watchlist.js.map"
-                                    :source-map-timestamp  true}}
+                                    :source-map-timestamp  true
+                                    :resource-paths ["resources"]
+                                    :foreign-libs [{:file "js-libs/xregexp.js"
+                                                    :provides ["com.xregexp"]}]
+
+                                    :externs ["externs-xregexp.js"]}}
 
                :options {:source-paths ["src/options"]
                          :compiler     {:output-to             "target/unpacked/options.js"
@@ -32,28 +37,50 @@
                                         :pretty-print          true
                                         :cache-analysis        true
                                         :source-map            "target/unpacked/options.js.map"
-                                        :source-map-timestamp  true}}
+                                        :source-map-timestamp  true
+                                        :resource-paths ["resources"]
+                                        :foreign-libs [{:file "js-libs/xregexp.js"
+                                                        :provides ["com.xregexp"]}]
+
+                                        :externs ["externs-xregexp.js"]}}
 
                :options-prod {:source-paths ["src/options"]
                               :compiler     {:output-to     "target/options-prod/options.js"
                                              :output-dir    "target/options-prod/options"
                                              :optimizations :advanced
-                                             :externs       ["resources/externs.js"]}}
+                                             :externs       ["resources/externs.js" "externs-xregexp.js"]
+                                             :resource-paths ["resources"]
+                                             :foreign-libs [{:file "js-libs/xregexp.js"
+                                                             :provides ["com.xregexp"]}]}}
 
                :test {:source-paths ["src/watchlist" "test"]
                       :compiler     {:output-to     "target/test/watchlist.js"
                                      :output-dir    "target/test/watchlist"
-                                     :optimizations :whitespace}
+                                     :optimizations :whitespace
+                                     :externs       ["resources/externs.js" "externs-xregexp.js"]
+                                     :resource-paths ["resources"]
+                                     :foreign-libs [{:file "js-libs/xregexp.js"
+                                                     :provides ["com.xregexp"]}]}
                       :notify-command ["phantomjs" "phantom/runner.js" "resources/testing/index.html"]}
 
                :prod {:source-paths ["src/watchlist" "src/extension"]
                       :compiler     {:output-to     "target/prod/watchlist.js"
                                      :output-dir    "target/prod/watchlist"
                                      :optimizations :advanced
-                                     :externs       ["resources/externs.js"]}}}}
+                                     :externs       ["resources/externs.js" "externs-xregexp.js"]
+                                     :resource-paths ["resources"]
+                                     :foreign-libs [{:file "js-libs/xregexp.js"
+                                                     :provides ["com.xregexp"]}]}}}}
 
   :chromebuild {:resource-paths ["resources/assets"]
                 :target-path "target/unpacked"}
+
+  :resource-paths ["resources"]
+
+  :foreign-libs [{:file "js-libs/xregexp.js"
+                  :provides ["com.xregexp"]}]
+
+  :externs ["externs-xregexp.js"]
 
   :aliases {"dev"      ["do" "clean,"
                         "shell" "scripts/insert_assets.sh" "target/unpacked,"

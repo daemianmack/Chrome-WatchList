@@ -51,49 +51,49 @@
    (is (= 0 (click 1 "grue" "cave")))))
 
 (deftest highlight-matches!-no-matches
-  (th/assert-matches
+  (th/assert-matches :xregexp
    {"animals" "shark"}
    "one ring to rule them all"
    "one ring to find them"
    "one ring to bring them all and in the darkness bind them."))
 
 (deftest highlight-matches!-single-category
-  (th/assert-matches
+  (th/assert-matches :xregexp
    {"numbers" "one"}
    "~one!numbers~ ring to rule them all"
    "~one!numbers~ ring to find them"
    "~one!numbers~ ring to bring them all and in the darkness bind them."))
 
 (deftest highlight-matches!-single-category-regex
-  (th/assert-matches
+  (th/assert-matches :xregexp
    {"nouns" "ring|darkness"}
    "one ~ring!nouns~ to rule them all"
    "one ~ring!nouns~ to find them"
    "one ~ring!nouns~ to b~ring!nouns~ them all and in the ~darkness!nouns~ bind them."))
 
-(deftest highlight-matches!-multiple-categories
-  (th/assert-matches
-   {"nouns" "ring|darkness" "errbody" "them\\ all"}
-   "one ~ring!nouns~ to rule ~them all!errbody~"
-   "one ~ring!nouns~ to find them"
-   "one ~ring!nouns~ to b~ring!nouns~ ~them all!errbody~ and in the ~darkness!nouns~ bind them."))
+(deftest highlight-matches!-multiple-categories-i-r-x
+  (th/assert-matches :xregexp
+                     {"nouns" "ring|darkness" "errbody" "them\\ all"}
+                     "one ~ring!nouns~ to rule ~them all!errbody~"
+                     "one ~ring!nouns~ to find them"
+                     "one ~ring!nouns~ to b~ring!nouns~ ~them all!errbody~ and in the ~darkness!nouns~ bind them."))
 
 (deftest highlight-matches!-multiple-categories-extra-regex
-  (th/assert-matches
+  (th/assert-matches :xregexp
    {"nouns" "ring|darkness" "stems" "them?|all|[a-z]ind"}
    "one ~ring!nouns~ to rule ~them!stems~ ~all!stems~"
    "one ~ring!nouns~ to ~find!stems~ ~them!stems~"
    "one ~ring!nouns~ to b~ring!nouns~ ~them!stems~ ~all!stems~ and in ~the!stems~ ~darkness!nouns~ ~bind!stems~ ~them!stems~."))
 
 (deftest highlight-matches!-multiple-categories-extra-regex-2
-  (th/assert-matches
+  (th/assert-matches :xregexp
    {"random" "one|to\\ ....\\ ...."}
    "~one!random~ ring ~to rule them!random~ all"
    "~one!random~ ring ~to find them!random~"
-   "~one!random~ ring to bring them all and in the darkness bind them."))
+   "~one!random~ ring to bring them all and in the darkness bind them"))
 
 (deftest highlight-matches!-overlapping-categories
-  (th/assert-matches
+  (th/assert-matches :xregexp
    {"verbs" "ring|rule" "nouns" "ring"}
    "one ~ring!nouns!verbs~ to ~rule!verbs~ them all"
    "one ~ring!nouns!verbs~ to find them"
@@ -101,7 +101,7 @@
 
 
 (deftest highlight-matches!-overlapping-categories-preserves-pre-existing-marks
-  (th/assert-matches
+  (th/assert-matches :xregexp
    {"verbs" "ring|rule" "nouns" "ring"}
    "one ~ring!nouns!verbs~ to ~rule!verbs~ them all"
    "one ~ring!nouns!verbs~ to find them"
@@ -109,10 +109,11 @@
    "-- <mark class=\"pre-existing\">Gary Busey</mark>, Keep On Keepin' On"))
 
 (deftest highlight-matches!-overlapping-categories-nests-within-pre-existing-marks
-  (th/assert-matches
+  (th/assert-matches :xregexp
    {"verbs" "ring|rule" "nouns" "ring" "people" "busey"}
    "one ~ring!nouns!verbs~ to ~rule!verbs~ them all"
    "one ~ring!nouns!verbs~ to find them"
    "one ~ring!nouns!verbs~ to b~ring!nouns!verbs~ them all and in the darkness bind them."
    "-- <mark class=\"pre-existing\">Gary <mark class=\"people watchlist-highlight\">Busey</mark></mark>, Keep On Keepin' On"))
+
 

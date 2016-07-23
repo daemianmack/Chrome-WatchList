@@ -4,3 +4,6 @@
 
 (defn ^:export run []
   (run-all-tests #"watchlist.*-test"))
+
+;; (defn ^:export run []
+;;   (run-all-tests #"watchlist.core-test"))

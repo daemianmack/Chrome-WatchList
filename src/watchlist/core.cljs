@@ -19,7 +19,7 @@
 (register-handler
  :initialize
  (fn [db [_ option-data]]
-   (let [matches (nodes/highlight-matches! :legacy (:terms option-data))]
+   (let [matches (nodes/highlight-matches! :xregexp (:terms option-data))]
      (assoc db :matches matches))))
 
 (defn mod-clicks-over-nodes
@@ -39,8 +39,8 @@
 
 (defn display-match [group-term hits started]
   (let [this (reagent/current-component)]
-    [:span {:class (str "watchlist-status-bar-item "
-                        (-> hits first :group name))
+    [:span {:class (apply str "watchlist-status-bar-item "
+                          (-> hits first :groups))
             :on-mouse-over (nodes/evt nodes/add-class this "watchlist-item-hover")
             :on-mouse-out  (nodes/evt nodes/del-class this "watchlist-item-hover")
             :on-mouse-down (nodes/evt nodes/add-class this "watchlist-item-click")
@@ -54,7 +54,7 @@
   (let [matches (subscribe [:matches])
         started (subscribe [:started])]
     (fn []
-      (when (seq @matches)
+      (when (not-empty @matches)
         [:div {:id "watchlist-status-bar" :class "watchlist-emphasized"}
          [:span {:class "watchlist-status-bar-item" :id "watchlist-title"} "Watchlist"]
          (doall
