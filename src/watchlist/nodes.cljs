@@ -17,30 +17,6 @@
     (mod-fn (.getDOMNode node) class)
     (.preventDefault e)))
 
-(declare node-is-regex-match?)
-(defn text-objs-w-i-r [terms]
-  ;; avoid "g" flag of regex.
-  (let [tree (.createTreeWalker js/document
-                                (.-body js/document)
-                                NodeFilter.SHOW_TEXT
-                                #js {:acceptNode
-                                     (fn [node]
-                                       (if (node-is-regex-match? (js/RegExp. terms) node)
-                                         NodeFilter.FILTER_ACCEPT
-                                         NodeFilter.FILTER_SKIP))})]
-    (take-while some? (repeatedly #(.nextNode tree)))))
-(defn text-objs-w-p-r-c [a-fn]
-  ;; avoid "g" flag of regex.
-  (let [tree (.createTreeWalker js/document
-                                (.-body js/document)
-                                NodeFilter.SHOW_TEXT
-                                #js {:acceptNode
-                                     (fn [node]
-                                       (if (a-fn (.-textContent node))
-                                         NodeFilter.FILTER_ACCEPT
-                                         NodeFilter.FILTER_SKIP))})]
-    (take-while some? (repeatedly #(.nextNode tree)))))
-
 (defn text-objs []
   (let [tree (.createTreeWalker js/document
                                 (.-body js/document)
@@ -54,7 +30,7 @@
 
 (defn text-gap-x [matches s start end]
   (if (< start end)
-    (conj matches {:node (mk-text-node-x (subs s start end))})
+    (conj! matches {:node (mk-text-node-x (subs s start end))})
     matches))
 
 (defn text-gap [matches s start end]
@@ -98,22 +74,26 @@
 
 (declare swap-in-nodes!)
 
+(defn get-cat-val [category-names match-data]
+  (first (for [category category-names
+               :let [value (goog.object/get match-data category)]
+               :when (not-empty value)]
+           [category value])))
+
+
 (defn mark-matches-x
   [regex-data node]
   (let [text-content (.-textContent node)
         regex (:regex regex-data)
-        new-node-descs (loop [pos 0
-                              acc {:matches []}]
-                         (if-let [match-data (.exec js/XRegExp text-content regex pos)]
-                           (let [[category value] (first (for [category (:category-names regex-data)
-                                                               :let [value (goog.object/get match-data category)]
-                                                               :when (not-empty value)]
-                                                          [category value]))
-                                 acc (-> acc
-                                         (update :matches text-gap-x text-content pos (.-index match-data))
-                                         (update :matches conj (mk-node-x category value)))]
-                             (recur (+ (.-index match-data) (count value)) acc))
-                           (text-gap-x (:matches acc) text-content pos (count text-content))))]
+        new-node-descs (persistent!
+                        (loop [acc (transient []) pos 0]
+                          (if-let [match-data (.exec js/XRegExp text-content regex pos)]
+                            (let [[category value] (get-cat-val (:category-names regex-data) match-data)
+                                  acc (-> acc
+                                          (text-gap-x text-content pos (.-index match-data))
+                                          (conj! (mk-node-x category value)))]
+                              (recur acc (+ (.-index match-data) (count value))))
+                            (text-gap-x acc text-content pos (count text-content)))))]
     (swap-in-nodes! node new-node-descs)
     (filter :html new-node-descs)))
 
@@ -181,22 +161,21 @@
             (.insertBefore parent (:node new-node) old-node))
           (.removeChild parent old-node)))))
 
-
-(defn parent-is-visible?
+(defn ^boolean parent-is-visible?
   [parent]
   (not= 0
         (.-offsetWidth parent)
         (.-offsetHeight parent)
         (.-length (.getClientRects parent))))
 
-(defn parent-can-contain-markup?
+(defn ^boolean parent-can-contain-markup?
   [parent]
   (not (contains? #{"SCRIPT" "NOSCRIPT" "TEXTAREA"} (.-tagName parent))))
 
 (defn node-is-regex-match? [regex node]
   (re-find regex (.-textContent node)))
 
-(defn node-is-regex-match?-x-reduce [regex node]
+(defn ^boolean node-is-regex-match?-x-reduce [regex node]
   (.test js/XRegExp regex (.-textContent node)))
 
 ;; This seems to perform somewhat faster than using an equivalent
