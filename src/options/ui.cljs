@@ -1,5 +1,6 @@
 (ns options.ui
-  (:require [clojure.string :refer [split join replace upper-case]]
+  (:require [common.regex :as regex]
+            [clojure.string :refer [split join replace upper-case]]
             [cljs.pprint :refer [pprint]]
             [com.xregexp]))
 
@@ -29,10 +30,14 @@
   (set-html! (str tab-handle "-status")
              (str (upcase tab-handle) " saved.")))
 
-(defn save-options* [tab-handle data]
+(defn save-options* [tab-handle data & [fn]]
   (.set js/chrome.storage.sync
         (clj->js {tab-handle data})
-        #(update-status tab-handle)))
+        (when fn
+          fn)))
+
+(defn save-options-and-flash [tab-handle data]
+  (save-options* tab-handle data #(update-status tab-handle)))
 
 (defmulti save-options! (fn [tab-handle] tab-handle))
 
@@ -55,25 +60,22 @@
          (partition-all 2))))
 
 (defmethod save-options! "terms" [tab-handle]
-  (let [final (reduce
-               (fn [acc [category terms]]
-                 (merge-with #(str %1 "|" %2)
-                             acc
-                             {category (to-regex terms)}))
-               {}
-               (populated-inputs (id->el "terms-form")))]
-    (save-options* tab-handle final)))
+  (let [terms  (populated-inputs (id->el "terms-form"))
+        parsed (regex/->regex-data terms)]
+    (save-options-and-flash tab-handle terms)
+    (save-options* "parsed" parsed)))
 
 (defmethod save-options! "blacklist" [tab-handle]
-  (save-options* tab-handle (-> (str tab-handle "-input")
-                                id->el
-                                .-value
-                                to-regex)))
+  (save-options-and-flash tab-handle (-> (str tab-handle "-input")
+                                         id->el
+                                         .-value
+                                         to-regex)))
 
 (defmethod save-options! "styles" [tab-handle]
-  (save-options* tab-handle (-> (str tab-handle "-input")
-                                id->el
-                                .-value)))
+  (save-options-and-flash tab-handle
+                          (-> (str tab-handle "-input")
+                              id->el
+                              .-value)))
 
 (defmulti fill-in-options! (fn [k v] k))
 
@@ -110,6 +112,8 @@
 
 (defmethod fill-in-options! "styles" [_ styles]
   (when styles (set-val! "styles-input" styles)))
+
+(defmethod fill-in-options! "parsed" [_ _])
 
 (defn apply-backward-compatibility [data]
   "0.6.0 simplified the data structure used to save options by

@@ -19,8 +19,9 @@
 (register-handler
  :initialize
  (fn [db [_ option-data]]
-   (let [matches (nodes/highlight-matches! :xregexp (:terms option-data))]
+   (let [matches (nodes/highlight-matches! :xregexp (:parsed option-data))]
      (assoc db :matches matches))))
+
 
 (defn mod-clicks-over-nodes
   [{:keys [term index] :as clicks} term-clicked nodes]
@@ -67,10 +68,10 @@
                      (.-URL js/document)))))
 
 (defn ^:export init! [options]
-  (dispatch [:started])
-  (dispatch [:initialize options])
   (let [{:keys [terms blacklist styles]} options]
     (when (and terms (url-allowed? blacklist))
+      (dispatch [:started])
+      (dispatch [:initialize options])
       (when (not-empty styles)
         (let [style (.createDom goog.dom "style" {"type" "text/css"} styles)]
           (.appendChild (.querySelector js/document "body") style)))

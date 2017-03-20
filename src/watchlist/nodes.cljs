@@ -1,13 +1,15 @@
 (ns watchlist.nodes
   (:require [clojure.string :refer [lower-case replace join split]]
             [clojure.set :refer [union]]
-            [cljs.pprint :refer [pprint cl-format]]
+            [cljs.pprint :refer [pprint]]
+            [common.regex :as regex]
+            [common.dom :as dom]
             [com.xregexp]))
+
+
 
 (enable-console-print!)
 
-(defn p [& xs]
-  (pprint (into [] xs)))
 
 (defn add-class [node class] (.add    (.-classList node) class))
 (defn del-class [node class] (.remove (.-classList node) class))
@@ -59,7 +61,7 @@
   2. nil *should* be passed to `mark-matches` which treats nil as a
      sentinel to trigger a wrap-up phase."
   (let [url-contains-term? (partial url-contains-term? (.-URL js/document))]
-    (every-pred some? url-contains-term?)))
+    (every-pred not-empty url-contains-term?)))
 
 (defn mk-node-x
   [category match]
@@ -80,8 +82,12 @@
                :when (not-empty value)]
            [category value])))
 
-
 (defn mark-matches-x
+  "If the text-bearing `node` matches against `regex-data` then swap
+  in to the DOM a new set of replacement nodes with the non-matching
+  text preserved and the matching text portion wrapped in a new HTML
+  node representing a parent tag we can use to manage it. Return all
+  such wrapped nodes."
   [regex-data node]
   (let [text-content (.-textContent node)
         regex (:regex regex-data)
@@ -196,34 +202,12 @@
 
 (defmulti highlight-matches! (fn [strategy data] strategy))
 
-(defn invert-terms [terms]
-  (apply merge-with into
-         (for [[k vs] terms
-               v (split vs #"\|")]
-           {v [(name k)]})))
-
-(defn ->regex-data [terms]
-  (let [terms (invert-terms terms)
-        term-map (reduce-kv
-                  (fn [acc term categories]
-                    (update acc categories
-                            conj term))
-                  {}
-                  terms)
-        regex (map (fn [[categories terms]]
-                     (cl-format nil"(?<~A>~A)"
-                                  (join "$$$" categories)
-                                  (join "|"   terms)))
-                   term-map)]
-    {:regex (js/XRegExp. (join "|" regex) "i")
-     :category-names (map #(join "$$$" %) (keys term-map))}))
-
 (defmethod highlight-matches! :xregexp
-  [_ term-data]
-  (when term-data
-    (let [regex-data (->regex-data term-data)
-          matching-texts (filterv (partial qualifying-node-x-reduce (:regex regex-data)) (text-objs))
-          new-nodes (reduce #(into %1 (mark-matches-x regex-data %2)) [] matching-texts)]
+  [_ regex-data]
+  (when regex-data
+    (let [regex-map (regex/regexify regex-data)
+          matching-texts (filterv (partial qualifying-node-x-reduce (:regex regex-map)) (text-objs))
+          new-nodes (reduce #(into %1 (mark-matches-x regex-map %2)) [] matching-texts)]
       new-nodes)))
 
 (defmethod highlight-matches! :legacy

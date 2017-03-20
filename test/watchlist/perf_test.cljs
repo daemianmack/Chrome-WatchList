@@ -1,6 +1,8 @@
 (ns watchlist.perf-test
   (:require [cljs.test :refer-macros [deftest]]
             [watchlist.nodes :as nodes]
+            [common.regex :as regex]
+            [common.dom :as dom]
             [cljs.pprint :refer [print-table pprint]]
             [clojure.string :refer [join]]
             [watchlist.test-helpers :as th]
@@ -9,37 +11,32 @@
 
 (def word-pool (take 100 (shuffle pd/words)))
 
-;; (def rand-word (partial rand-nth word-pool))
-
-;; (def fake-content
-;;   (take 10 (repeatedly rand-word)))
-
-(defn el-multiplier [kids]
-  (for [n (range 4)
+(defn el-multiplier [kids x-by]
+  (for [n (range x-by)
         kid kids]
     [:div (take 2 word-pool) kid]))
 
-(defn gen-dom [x]
-  (loop [to-go x
+(defn gen-dom [depth x-by]
+  (loop [to-go depth
          kids [[:div (take 4 word-pool)][:div (take 4 (drop 4 word-pool))]]]
     (if (zero? to-go)
       kids
-      (recur (dec to-go) (el-multiplier kids)))))
+      (recur (dec to-go) (el-multiplier kids x-by)))))
 
-;; (defn gen-terms [n]
-;;   (apply merge
-;;          (repeatedly n #(hash-map (gensym)
-;;                                   (join "|" (take n (drop (- n 2) word-pool)))))))
-
+;; This should join on "\n", not "|" but leaving it in place now for
+;; perf comparison. It means that the :xregexp perftests don't apply
+;; the correct class set to multiple-match nodes, but this likely
+;; doesn't impact perf much -- it's just a lookup to a different key.
 (defn gen-terms [n]
   (into {}
-        (for [sq (take n (partition-all n 1 word-pool))]
+        (for [sq (take (* 20 n) (partition-all n 1 word-pool))]
           [(str (gensym)) (join "|" sq)])))
 
+
 (def perf-scenarios
-  (let [s-dom #(hipo/create [:div#sandbox (gen-dom 2)])
-        m-dom #(hipo/create [:div#sandbox (gen-dom 4)])
-        l-dom #(hipo/create [:div#sandbox (gen-dom 6)])
+  (let [s-dom #(hipo/create [:div#sandbox (gen-dom 2 2)])
+        m-dom #(hipo/create [:div#sandbox (gen-dom 4 4)])
+        l-dom #(hipo/create [:div#sandbox (gen-dom 6 6)])
         s-terms (gen-terms 2)
         m-terms (gen-terms 4)
         l-terms (gen-terms 8)]
@@ -55,7 +52,8 @@
      ["lrg DOM, 4x4 terms" l-dom m-terms]
      ["lrg DOM, 8x8 terms" l-dom l-terms]]))
 
-#_(deftest perf-test
+
+(deftest perf-test
   (prn :legacy-perf-test)
   (print-table
    (sort-by :elapsed-ms
@@ -74,7 +72,8 @@
              []
              perf-scenarios))))
 
-(deftest perf-test-i-r-x
+
+(deftest perf-test-xregexp
   (prn :perf-test-xregexp)
   (print-table
    (sort-by :elapsed-ms
@@ -82,7 +81,8 @@
              (fn [acc [label sandbox terms]]
                (let [sandbox (sandbox)]
                  (.appendChild js/document.body sandbox)
-                 (let [start (.now js/Date)]
+                 (let [terms (regex/->regex-data terms)
+                       start (.now js/Date)]
                    (nodes/highlight-matches! :xregexp terms)
                    (let [res {:label label
                               :elapsed-ms (- (.now js/Date) start)

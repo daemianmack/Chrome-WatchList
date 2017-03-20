@@ -2,9 +2,11 @@
   (:require [cljs.test       :refer-macros [is]]
             [clojure.string  :refer [replace join split]]
             [cljs.pprint     :refer [pprint cl-format]]
+            [common.regex    :as regex]
             [watchlist.nodes :refer [highlight-matches!]]
             [hipo.core       :as hipo]
             [instaparse.core :as insta]))
+
 
 (def div-sandbox
   [:div#sandbox
@@ -92,8 +94,14 @@
               []
               (rest parsed))))))
 
+(defn test-syntax->ui-syntax [m]
+  "Expand convenient test syntax to syntax used in UI."
+  (reduce-kv #(assoc %1 %2 (join "\n" (split %3 #"\|")))
+             {}
+             m))
+
 (defn assert-matches [k match-spec & strs]
-  (highlight-matches! k match-spec)
+  (highlight-matches! k (regex/->regex-data (test-syntax->ui-syntax match-spec)))
   (doall (map
           (fn [regex node]
             (is (re-find regex (.-innerHTML node))))

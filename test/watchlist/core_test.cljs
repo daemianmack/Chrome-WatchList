@@ -1,5 +1,6 @@
 (ns watchlist.core-test
   (:require [cljs.test :refer-macros [deftest is testing use-fixtures]]
+            [common.regex :as regex]
             [watchlist.core :as core]
             [watchlist.nodes :as nodes]
             [watchlist.test-helpers :as th]))
@@ -10,32 +11,53 @@
 
 (enable-console-print!)
 
-(deftest mark-matches-test
-  (let [string "You were eaten by a grue"
-        mark   #(nodes/mark-matches (js/RegExp. % "gi") string)]
+
+
+(defn mk-tree [txt]
+  (.createDom goog.dom "div" (clj->js {:id "foo"})
+              (.createTextNode js/document txt)))
+
+(defn walk-tree [root]
+  (let [tree (.createTreeWalker js/document
+                                root
+                                NodeFilter.SHOW_TEXT)]
+    (take-while some? (repeatedly #(.nextNode tree)))))
+
+(defn mark-matches [regex tree]
+  (nodes/mark-matches-x regex (first (walk-tree tree))))
+
+(defn terms-marked [tree-fn terms]
+   (map :term (mark-matches (regex/->regex terms) (tree-fn))))
+
+(deftest mark-matches-basic-regexp-functioning-test
+  (let [tree #(mk-tree "You were eaten by a grue")]
     (testing "No matches"
-      (is (= [{:text "You were eaten by a grue"}]
-             (mark "xyzzy"))))
+      (is (= []
+             (terms-marked tree {"dummygroup" "xyzzy"}))))
     (testing "Leading match"
-      (is (= [{:html "You"} {:text " were eaten by a grue"}]
-             (mark "you"))))
+      (is (= ["you"]
+             (terms-marked tree {"dummygroup" "you"}))))
     (testing "Interim match"
-      (is (= [{:text "You were eaten "}
-              {:html "by"}
-              {:text " a grue"}]
-             (mark "by"))))
+      (is (= ["by"]
+             (terms-marked tree {"dummygroup" "by"}))))
     (testing "Trailing match"
-      (is (= [{:text "You were eaten by a gr"} {:html "ue"}]
-             (mark "ue"))))
+      (is (= ["ue"]
+             (terms-marked tree {"dummygroup" "ue"}))))
     (testing "Leading and trailing match"
-      (is (= [{:html "Yo"} {:text "u were eaten by a gr"} {:html "ue"}]
-             (mark "yo|ue"))))))
+      (is (= ["yo" "ue"]
+             (terms-marked tree {"dummygroup" "yo|ue"}))))))
 
 (deftest url-allowed-test
-  (testing "Match appears in URL and is thus ignored"
-    (is (= [{:text "This string contains the word resources"}]
-           (nodes/mark-matches (js/RegExp. "resources" "gi")
-                               "This string contains the word resources")))))
+  "This test makes use of the incidental fact that the file URI passed
+  to the Phantom test runner contains the word 'resources' and does
+  not contain the word 'Qresources'."
+  (let [tree #(mk-tree "resources")]
+    (testing "Match appears in URL and is thus ignored"
+      (is (= []
+             (terms-marked tree {"dummygroup" "resources"}))))
+    (testing "Match doesn't appear in URL and is thus acknowledged"
+      (is (= []
+             (terms-marked tree {"dummygroup" "Qresources"}))))))
 
 (deftest mod-clicks-over-nodes-test
   (let [three-fake-nodes [{} {} {}]
@@ -115,5 +137,3 @@
    "one ~ring!nouns!verbs~ to find them"
    "one ~ring!nouns!verbs~ to b~ring!nouns!verbs~ them all and in the darkness bind them."
    "-- <mark class=\"pre-existing\">Gary <mark class=\"people watchlist-highlight\">Busey</mark></mark>, Keep On Keepin' On"))
-
-

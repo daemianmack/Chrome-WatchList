@@ -13,7 +13,7 @@
   :source-paths ["src/watchlist" "src/extension" "src/options"]
 
   :cljsbuild {:builds
-              {:dev {:source-paths ["src/watchlist" "src/extension"]
+              {:dev {:source-paths ["src/common" "src/watchlist" "src/extension"]
                      :compiler     {:output-to             "target/unpacked/watchlist.js"
                                     :output-dir            "target/unpacked/watchlist"
                                     :optimizations         :whitespace
@@ -29,7 +29,7 @@
 
                                     :externs ["externs-xregexp.js"]}}
 
-               :options {:source-paths ["src/options"]
+               :options {:source-paths ["src/common" "src/options"]
                          :compiler     {:output-to             "target/unpacked/options.js"
                                         :output-dir            "target/unpacked/options"
                                         :optimizations         :whitespace
@@ -44,7 +44,7 @@
 
                                         :externs ["externs-xregexp.js"]}}
 
-               :options-prod {:source-paths ["src/options"]
+               :options-prod {:source-paths ["src/common" "src/options"]
                               :compiler     {:output-to     "target/options-prod/options.js"
                                              :output-dir    "target/options-prod/options"
                                              :optimizations :advanced
@@ -53,7 +53,7 @@
                                              :foreign-libs [{:file "js-libs/xregexp.js"
                                                              :provides ["com.xregexp"]}]}}
 
-               :test {:source-paths ["src/watchlist" "test"]
+               :test {:source-paths ["src/common" "src/watchlist" "test"]
                       :compiler     {:output-to     "target/test/watchlist.js"
                                      :output-dir    "target/test/watchlist"
                                      :optimizations :whitespace
@@ -63,7 +63,7 @@
                                                      :provides ["com.xregexp"]}]}
                       :notify-command ["phantomjs" "phantom/runner.js" "resources/testing/index.html"]}
 
-               :prod {:source-paths ["src/watchlist" "src/extension"]
+               :prod {:source-paths ["src/common" "src/watchlist" "src/extension"]
                       :compiler     {:output-to     "target/prod/watchlist.js"
                                      :output-dir    "target/prod/watchlist"
                                      :optimizations :advanced
