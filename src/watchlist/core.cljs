@@ -19,7 +19,7 @@
 (register-handler
  :initialize
  (fn [db [_ option-data]]
-   (let [matches (nodes/highlight-matches! :xregexp (:parsed option-data))]
+   (let [matches (nodes/highlight-matches! (:parsed option-data))]
      (assoc db :matches matches))))
 
 

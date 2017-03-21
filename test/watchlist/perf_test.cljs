@@ -62,7 +62,7 @@
      ["L DOM M terms" 4096 4 L-dom M-terms]
      ["L DOM L terms" 4096 4 L-dom L-terms]]))
 
-(deftest perf-test-xregexp
+(deftest perf-test-dom-scenarios
   (print-table
    (sort-by :elapsed-ms
             (reduce
@@ -71,7 +71,7 @@
                  (.appendChild js/document.body sandbox)
                  (let [terms (regex/->regex-data terms)
                        start (.now js/Date)]
-                   (nodes/highlight-matches! :xregexp terms)
+                   (nodes/highlight-matches! terms)
                    (let [res {:label label
                               :nodes n-nodes
                               :matchable-words (* n-nodes n-words-per-node)

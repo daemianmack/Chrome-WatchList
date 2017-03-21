@@ -100,8 +100,8 @@
              {}
              m))
 
-(defn assert-matches [k match-spec & strs]
-  (highlight-matches! k (regex/->regex-data (test-syntax->ui-syntax match-spec)))
+(defn assert-matches [match-spec & strs]
+  (highlight-matches! (regex/->regex-data (test-syntax->ui-syntax match-spec)))
   (doall (map
           (fn [regex node]
             (is (re-find regex (.-innerHTML node))))
