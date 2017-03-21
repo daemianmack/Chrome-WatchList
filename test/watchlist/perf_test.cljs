@@ -15,14 +15,10 @@
   ([tn x] (next-n-strs tn tn x))
   ([tn dn x] (join " " (take tn (drop dn x)))))
 
-;; This should join on "\n", not "|" but leaving it in place now for
-;; perf comparison. It means that the :xregexp perftests don't apply
-;; the correct class set to multiple-match nodes, but this likely
-;; doesn't impact perf much -- it's just a lookup to a different key.
 (defn gen-terms [group-count group-size]
   (into {}
         (for [sq (take group-count (partition-all group-size 1 word-pool))]
-          [(str (gensym)) (join "|" sq)])))
+          [(str (gensym)) (join "\n" sq)])))
 
 (defn mk-parent [height children terms-per cycler offset]
   [:div {"height" height "offset" offset}
@@ -66,28 +62,7 @@
      ["L DOM M terms" 4096 4 L-dom M-terms]
      ["L DOM L terms" 4096 4 L-dom L-terms]]))
 
-(deftest perf-test
-  (prn :legacy-perf-test)
-  (print-table
-   (sort-by :elapsed-ms
-            (reduce
-             (fn [acc [label n-nodes n-words-per-node sandbox terms]]
-               (let [sandbox (sandbox)]
-                 (.appendChild js/document.body sandbox)
-                 (let [start (.now js/Date)]
-                   (nodes/highlight-matches! :legacy terms)
-                   (let [res {:label label
-                              :nodes n-nodes
-                              :matchable-words (* n-nodes n-words-per-node)
-                              :matched-count (.-length (.getElementsByTagName js/document "mark"))
-                              :elapsed-ms (- (.now js/Date) start)}]
-                     (.removeChild js/document.body sandbox)
-                     (conj acc res)))))
-             []
-             perf-scenarios))))
-
 (deftest perf-test-xregexp
-  (prn :perf-test-xregexp)
   (print-table
    (sort-by :elapsed-ms
             (reduce
