@@ -10,84 +10,98 @@
             [watchlist.perf-data :as pd]))
 
 (def word-pool (take 100 (shuffle pd/words)))
-
-(defn el-multiplier [kids x-by]
-  (for [n (range x-by)
-        kid kids]
-    [:div (take 2 word-pool) kid]))
-
-(defn gen-dom [depth x-by]
-  (loop [to-go depth
-         kids [[:div (take 4 word-pool)][:div (take 4 (drop 4 word-pool))]]]
-    (if (zero? to-go)
-      kids
-      (recur (dec to-go) (el-multiplier kids x-by)))))
+(def word-cycler (cycle word-pool))
+(defn next-n-strs
+  ([tn x] (next-n-strs tn tn x))
+  ([tn dn x] (join " " (take tn (drop dn x)))))
 
 ;; This should join on "\n", not "|" but leaving it in place now for
 ;; perf comparison. It means that the :xregexp perftests don't apply
 ;; the correct class set to multiple-match nodes, but this likely
 ;; doesn't impact perf much -- it's just a lookup to a different key.
-(defn gen-terms [n]
+(defn gen-terms [group-count group-size]
   (into {}
-        (for [sq (take (* 20 n) (partition-all n 1 word-pool))]
+        (for [sq (take group-count (partition-all group-size 1 word-pool))]
           [(str (gensym)) (join "|" sq)])))
 
+(defn mk-parent [height children terms-per cycler offset]
+  [:div {"height" height "offset" offset}
+   (next-n-strs terms-per offset cycler)
+   children])
+
+(defn mk-tree
+  ([height cycler terms-per]
+   (mk-tree (dec height) cycler terms-per ()))
+  ([height cycler terms-per nodes]
+   (if (zero? height)
+     (mk-parent height nodes terms-per cycler 0)
+     (mk-tree (dec height)
+                (drop (* terms-per 2) cycler)
+                terms-per
+                (map-indexed (partial mk-parent height nodes terms-per cycler)
+                             (range 2))))))
 
 (def perf-scenarios
-  (let [s-dom #(hipo/create [:div#sandbox (gen-dom 2 2)])
-        m-dom #(hipo/create [:div#sandbox (gen-dom 4 4)])
-        l-dom #(hipo/create [:div#sandbox (gen-dom 6 6)])
-        s-terms (gen-terms 2)
-        m-terms (gen-terms 4)
-        l-terms (gen-terms 8)]
-    [["sml DOM, 2x2 terms" s-dom s-terms]
-     ["sml DOM, 4x4 terms" s-dom m-terms]
-     ["sml DOM, 8x8 terms" s-dom l-terms]
+  (let [T-dom #(hipo/create [:section#sandbox (mk-tree  4 word-cycler 2)])
+        S-dom #(hipo/create [:section#sandbox (mk-tree  8 word-cycler 2)])
+        M-dom #(hipo/create [:section#sandbox (mk-tree 10 word-cycler 4)])
+        L-dom #(hipo/create [:section#sandbox (mk-tree 12 word-cycler 4)])
 
-     ["med DOM, 2x2 terms" m-dom s-terms]
-     ["med DOM, 4x4 terms" m-dom m-terms]
-     ["med DOM, 8x8 terms" m-dom l-terms]
+        T-terms (gen-terms  20 1)
+        S-terms (gen-terms  40 2)
+        M-terms (gen-terms  80 4)
+        L-terms (gen-terms 160 8)]
 
-     ["lrg DOM, 2x2 terms" l-dom s-terms]
-     ["lrg DOM, 4x4 terms" l-dom m-terms]
-     ["lrg DOM, 8x8 terms" l-dom l-terms]]))
+    [#_["T DOM, T terms" 16 2 T-dom T-terms]
 
+     ["S DOM S terms"  256 2 S-dom S-terms]
+     ["S DOM M terms"  256 2 S-dom M-terms]
+     ["S DOM L terms"  256 2 S-dom L-terms]
+
+     ["M DOM S terms" 1024 4 M-dom S-terms]
+     ["M DOM M terms" 1024 4 M-dom M-terms]
+     ["M DOM L terms" 1024 4 M-dom L-terms]
+
+     ["L DOM S terms" 4096 4 L-dom S-terms]
+     ["L DOM M terms" 4096 4 L-dom M-terms]
+     ["L DOM L terms" 4096 4 L-dom L-terms]]))
 
 (deftest perf-test
   (prn :legacy-perf-test)
   (print-table
    (sort-by :elapsed-ms
             (reduce
-             (fn [acc [label sandbox terms]]
+             (fn [acc [label n-nodes n-words-per-node sandbox terms]]
                (let [sandbox (sandbox)]
                  (.appendChild js/document.body sandbox)
                  (let [start (.now js/Date)]
                    (nodes/highlight-matches! :legacy terms)
                    (let [res {:label label
-                              :elapsed-ms (- (.now js/Date) start)
-                              :matchable-count (.-length (.getElementsByTagName js/document "div"))
-                              :matched-count (.-length (.getElementsByTagName js/document "mark"))}]
+                              :nodes n-nodes
+                              :matchable-words (* n-nodes n-words-per-node)
+                              :matched-count (.-length (.getElementsByTagName js/document "mark"))
+                              :elapsed-ms (- (.now js/Date) start)}]
                      (.removeChild js/document.body sandbox)
                      (conj acc res)))))
              []
              perf-scenarios))))
-
 
 (deftest perf-test-xregexp
   (prn :perf-test-xregexp)
   (print-table
    (sort-by :elapsed-ms
             (reduce
-             (fn [acc [label sandbox terms]]
+             (fn [acc [label n-nodes n-words-per-node sandbox terms]]
                (let [sandbox (sandbox)]
                  (.appendChild js/document.body sandbox)
                  (let [terms (regex/->regex-data terms)
                        start (.now js/Date)]
                    (nodes/highlight-matches! :xregexp terms)
                    (let [res {:label label
-                              :elapsed-ms (- (.now js/Date) start)
-                              :matchable-count (.-length (.getElementsByTagName js/document "div"))
-                              :matched-count (.-length (.getElementsByTagName js/document "mark"))}]
+                              :nodes n-nodes
+                              :matchable-words (* n-nodes n-words-per-node)
+                              :matched-count (.-length (.getElementsByTagName js/document "mark"))
+                              :elapsed-ms (- (.now js/Date) start)}]
                      (.removeChild js/document.body sandbox)
                      (conj acc res)))))
              []
