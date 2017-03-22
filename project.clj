@@ -1,12 +1,12 @@
 (defproject watchlist "0.6.0"
-  :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.7.228"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha15"]
+                 [org.clojure/clojurescript "1.9.494"]
                  [reagent  "0.5.1"]
                  [re-frame "0.7.0"]
                  [com.lucasbradstreet/instaparse-cljs "1.4.1.2"]
                  [hipo "0.5.2"]]
 
-  :plugins [[lein-cljsbuild "1.1.1"]
+  :plugins [[lein-cljsbuild "1.1.5"]
             [lein-shell "0.4.2"]
             [lein-chromebuild "0.3.0"]]
 
