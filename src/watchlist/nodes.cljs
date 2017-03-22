@@ -89,42 +89,13 @@
     (swap-in-nodes! node new-node-descs)
     (filter :html new-node-descs)))
 
-(extend-type js/DOMTokenList
-  ISeqable
-  (-seq [array] (array-seq array 0)))
-
-(defn adopt-classes!
-  [old-node donor-nodes]
-  (let [parent (.-parentNode old-node)
-        new-classes (reduce
-                     (fn [acc node] (into acc (.-classList node)))
-                     #{}
-                     (map :node donor-nodes))
-        old-classes (set (.-classList parent))]
-    ;; Wipe out existing classes so we can add all classes in predictable order.
-    (doseq [class old-classes]
-      (del-class parent class))
-    (doseq [class (sort (union new-classes old-classes))]
-      (add-class parent class))
-    (doseq [node donor-nodes]
-      (set! (.-display (.-style (:node node ))) "none")
-      (.insertBefore parent (:node node) old-node))))
-
-(defn previous-watchlist-mark?
-  [node]
-  (let [parent (.-parentNode node)]
-    (and (= "MARK" (.-tagName parent))
-         (not (neg? (.indexOf (.-className parent)
-                              "watchlist-highlight"))))))
 
 (defn swap-in-nodes!
   [old-node new-nodes]
-  (if (previous-watchlist-mark? old-node)
-    (adopt-classes! old-node new-nodes)
-    (do (let [parent (.-parentNode old-node)]
-          (doseq [new-node new-nodes]
-            (.insertBefore parent (:node new-node) old-node))
-          (.removeChild parent old-node)))))
+  (let [parent (.-parentNode old-node)]
+    (doseq [new-node new-nodes]
+      (.insertBefore parent (:node new-node) old-node))
+    (.removeChild parent old-node)))
 
 (defn ^boolean parent-is-visible?
   [parent]
