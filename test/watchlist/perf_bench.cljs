@@ -1,4 +1,4 @@
-(ns watchlist.perf-test
+(ns watchlist.perf-bench
   (:require [cljs.test :refer-macros [deftest]]
             [watchlist.nodes :as nodes]
             [common.regex :as regex]
