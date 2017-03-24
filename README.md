@@ -54,8 +54,8 @@ First, make sure you've run `lein dev` or `lein prod`, and then in Chrome...
 for changes, automatically re-running the tests with each change.
 `phantomjs` must be on the `PATH`.
 
-There is a thumb-in-the-wind set of performance benchmark scenarios
-that can be chosen at runtime via env var...
+There is a set of thumb-in-the-wind performance benchmark scenarios
+that can be chosen at test runtime via an env var...
 
 `PERF=true lein autotest`
 

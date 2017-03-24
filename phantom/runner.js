@@ -16,7 +16,18 @@ page.onConsoleMessage = function (message) {
 };
 
 
+/*
+There are a number of outstanding issues with running phantomjs in
+this manner that I haven't been able to resolve. Luckily they mostly
+matter only when executing one-off test runs, and matter less when in
+continuous autotesting mode.
 
+1 - Phantom will not recognize any attempt to exit with a specific
+exit code, so while we can print test failures, we cannot let the
+shell become aware of them.
+
+2 - Phantom takes an extra ~60 seconds to exit after a call to `phantom.exit()`.
+*/
 if (perf) {
     page.open(url, function (status) {
         if (status !== "success") {
@@ -27,7 +38,7 @@ if (perf) {
         }
 
         page.evaluate(function() {
-            watchlist.test.perf_bench()
+            watchlist.test.perf_bench();
         });
 
         setTimeout(function() { // https://github.com/ariya/phantomjs/issues/12697
@@ -45,8 +56,8 @@ else {
             }, 0);
         }
 
-        page.evaluate(function() {
-            watchlist.test.run_tests()
+         page.evaluate(function() {
+            watchlist.test.run_tests();
         });
 
         setTimeout(function() { // https://github.com/ariya/phantomjs/issues/12697
