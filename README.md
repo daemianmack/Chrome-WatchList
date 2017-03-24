@@ -31,11 +31,14 @@ This is a ClojureScript jam. You'll want [lein](http://leiningen.org/).
 First, make sure you've run `lein dev` or `lein prod`, and then in Chrome...
 
 1. Wrench thingy > Tools > Extensions.
-2. Hit "Load unpacked extension..." which you'll only see if you're in
-   developer mode.
-3. Locate the downloaded git repo and select `builds/dev`. Click OK.
+2. Hit "Load unpacked extension..." which you'll only see if you're in developer mode.
+3. Locate the downloaded git repo and select the new build under `target`. Click OK.
 4. Fiddle with the options.
 5. Rejoice in a life *finally* worth living.
+
+##### Testing
+
+`lein cljsbuild once test`
 
 #### Dev build
 
@@ -47,7 +50,14 @@ First, make sure you've run `lein dev` or `lein prod`, and then in Chrome...
 
 #### Test build
 
-`lein autotest` will start watching the source and test directories for changes, automatically re-running the tests with each change.
+`lein autotest` will start watching the source and test directories
+for changes, automatically re-running the tests with each change.
+`phantomjs` must be on the `PATH`.
+
+There is a thumb-in-the-wind set of performance benchmark scenarios
+that can be chosen at runtime via env var...
+
+`PERF=true lein autotest`
 
 #### All builds
 `lein chromebuild auto` will conveniently auto-execute all builds, including `test`, and will monitor `resource/assets` for changes; it is not fast, is included mainly for novelty and should be replaced with a small source/asset-monitoring harness integrated into the above builds.
