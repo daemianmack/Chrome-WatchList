@@ -4,7 +4,7 @@
             [cljs.pprint :refer [pprint]]
             [common.regex :as regex]
             [common.dom :as dom]
-            [com.xregexp]))
+            cljsjs.xregexp))
 
 
 

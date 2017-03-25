@@ -1,6 +1,6 @@
 (ns common.regex
   (:require [clojure.string :refer [join split]]
-            [com.xregexp]))
+            cljsjs.xregexp))
 
 (defn category-combinations [terms]
   "Invert a map such that the resulting keys are the unique

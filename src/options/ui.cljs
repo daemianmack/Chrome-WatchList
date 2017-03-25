@@ -1,8 +1,7 @@
 (ns options.ui
   (:require [common.regex :as regex]
             [clojure.string :refer [split join replace upper-case]]
-            [cljs.pprint :refer [pprint]]
-            [com.xregexp]))
+            [cljs.pprint :refer [pprint]]))
 
 (enable-console-print!)
 
