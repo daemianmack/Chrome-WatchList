@@ -18,6 +18,9 @@
                                     :output-dir            "target/unpacked/watchlist"
                                     :optimizations         :whitespace
                                     :main                  "extension.chrome"
+                                    ;; Work around issue raised with CLJS compiler commit 404d6444cb641
+                                    ;; More here: http://dev.clojure.org/jira/browse/CLJS-1547?focusedCommentId=42617
+                                    :closure-output-charset "US-ASCII"
                                     :anon-fn-naming-policy :unmapped
                                     :pretty-print          true
                                     :cache-analysis        true
@@ -33,6 +36,9 @@
                          :compiler     {:output-to             "target/unpacked/options.js"
                                         :output-dir            "target/unpacked/options"
                                         :optimizations         :whitespace
+                                        ;; Work around issue raised with CLJS compiler commit 404d6444cb641
+                                        ;; More here: http://dev.clojure.org/jira/browse/CLJS-1547?focusedCommentId=42617
+                                        :closure-output-charset "US-ASCII"
                                         :anon-fn-naming-policy :unmapped
                                         :pretty-print          true
                                         :cache-analysis        true
