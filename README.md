@@ -60,7 +60,7 @@ that can be chosen at test runtime via an env var...
 `PERF=true lein autotest`
 
 #### All builds
-`lein chromebuild auto` will conveniently auto-execute all builds, including `test`, and will monitor `resource/assets` for changes; it is not fast, is included mainly for novelty and should be replaced with a small source/asset-monitoring harness integrated into the above builds.
+`lein chromebuild auto` will conveniently auto-execute all builds, including `test`, and will monitor `resource/assets` for changes; it is not fast, is included mainly for novelty and should be replaced with `lein auto` or similar if fast-feedback asset development becomes helpful again.
 
 
 
