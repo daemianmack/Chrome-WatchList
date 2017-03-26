@@ -19,11 +19,9 @@
 (defn text-objs []
   (dom/node-seq {:show :text}))
 
-(defn mk-text-node [text] (.createTextNode js/document text))
-
 (defn text-gap [matches s start end]
   (if (< start end)
-    (conj! matches {:node (mk-text-node (subs s start end))})
+    (conj! matches {:node (dom/mk-txt (subs s start end))})
     matches))
 
 
@@ -46,7 +44,7 @@
 (defn mk-node
   [category match]
   (let [categories (split category #"\$\$\$")
-        node (dom/mk-el "mark" nil (mk-text-node match))]
+        node (dom/mk-el "mark" nil (dom/mk-txt match))]
     (doseq [class (sort (into ["watchlist-highlight"] categories))]
       (dom/add-class node class))
     {:node node
