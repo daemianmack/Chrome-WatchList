@@ -57,7 +57,7 @@
 
 (defmethod save-options! "terms" [tab-handle]
   (let [terms  (populated-inputs (id->el "terms-form"))
-        parsed (regex/->regex-data terms)]
+        parsed (regex/->regex-str terms)]
     (save-options-and-flash tab-handle terms)
     (save-options* "parsed" parsed)))
 

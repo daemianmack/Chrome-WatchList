@@ -19,7 +19,7 @@
      {}
      term-map)))
 
-(defn ->regex-data [terms]
+(defn ->regex-str [terms]
   "Prepare a map of categories to terms for regexification.
 
    As a workaround to XRegExp's lack of ability to match a term
@@ -46,11 +46,10 @@
                           (join "|" terms)
                           ")"))
                    combos)]
-    {:regex (join "|" regex)
-     :category-names (map #(join "$$$" %) (keys combos))}))
+    (join "|" regex)))
 
-(defn regexify [regex-map]
-  (update regex-map :regex #(js/XRegExp. % "i")))
+(defn regexify [regex-str]
+  (js/XRegExp. regex-str "i"))
 
 (defn ->regex [terms]
-  (regexify (->regex-data terms)))
+  (regexify (->regex-str terms)))

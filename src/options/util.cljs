@@ -9,7 +9,7 @@
                :when (not-empty v)]
            {v [k]})))
 
-(defn ->regex-data [terms] ;; TODO Explain purpose of fn -- allows one call to highlight-matches by creating single regex with unique category-name per combo of cats.
+(defn ->regex-str [terms] ;; TODO Explain purpose of fn -- allows one call to highlight-matches by creating single regex with unique category-name per combo of cats.
   (let [terms (invert-terms terms)
         term-map (reduce-kv
                   (fn [acc term categories]

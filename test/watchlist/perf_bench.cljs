@@ -69,7 +69,7 @@
              (fn [acc [label n-nodes n-words-per-node sandbox terms]]
                (let [sandbox (sandbox)]
                  (.appendChild js/document.body sandbox)
-                 (let [terms (regex/->regex-data terms)
+                 (let [terms (regex/->regex-str terms)
                        start (.now js/Date)]
                    (nodes/highlight-matches! terms)
                    (let [res {:label label

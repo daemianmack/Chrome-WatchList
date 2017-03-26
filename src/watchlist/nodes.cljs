@@ -54,25 +54,40 @@
 
 (declare swap-in-nodes!)
 
-(defn get-cat-val [category-names match-data]
-  (first (for [category category-names
-               :let [value (goog.object/get match-data category)]
-               :when (not-empty value)]
-           [category value])))
+(defn get-category-names' [regex]
+  (js->clj (goog.object/getValueByKeys regex
+                                       "xregexp"
+                                       "captureNames")))
+
+(def get-category-names (memoize get-category-names'))
+
+;; xregexp lib's return value for a match is pretty wonky; match
+;; objects contain a key for every capture group present in the regex,
+;; pointing to empty strings in the case of no match.
+;; Thus, finding the piece of text that matched the regex requires
+;; swimming through the object, asking it for the values associated
+;; with every possible capture group name, looking for a non-empty one.
+(defn get-cat-val [regex match-data]
+  (let [category-names (get-category-names regex)]
+    ;; `first` sensible here because only one match possible per term
+    ;; owing to regex formed via `regex/->regex-str`.
+    (first (for [category category-names
+                :let [value (goog.object/get match-data category)]
+                :when (not-empty value)]
+            [category value]))))
 
 (defn mark-matches
-  "If the text-bearing `node` matches against `regex-data` then swap
+  "If the text-bearing `node` matches against `regex` then swap
   in to the DOM a new set of replacement nodes with the non-matching
   text preserved and the matching text portion wrapped in a new HTML
   node representing a parent tag we can use to manage it. Return all
   such wrapped nodes."
-  [regex-data node]
+  [regex node]
   (let [text-content (.-textContent node)
-        regex (:regex regex-data)
         new-node-descs (persistent!
                         (loop [acc (transient []) pos 0]
                           (if-let [match-data (flt (.exec js/XRegExp text-content regex pos))]
-                            (let [[category value] (get-cat-val (:category-names regex-data) match-data)
+                            (let [[category value] (get-cat-val regex match-data)
                                   acc (-> acc
                                           (text-gap text-content pos (.-index match-data))
                                           (conj! (mk-node category value)))]
@@ -112,12 +127,11 @@
          (parent-is-visible? parent))))
 
 (defn highlight-matches!
-  [regex-data]
-  (when regex-data
-    (let [regex-map (regex/regexify regex-data)
-          matching-texts (filterv (partial qualifying-node (:regex regex-map)) (text-objs))
-          new-nodes (reduce #(into %1 (mark-matches regex-map %2)) [] matching-texts)]
-      new-nodes)))
+  [regex-str]
+  (let [regex-map (regex/regexify regex-str)
+        matching-texts (filterv (partial qualifying-node regex-map) (text-objs))
+        new-nodes (reduce #(into %1 (mark-matches regex-map %2)) [] matching-texts)]
+    new-nodes))
 
 
 (defn ancestors-of [node]

@@ -1,7 +1,8 @@
 (ns watchlist.regex-test
   (:require [cljs.test :refer-macros [deftest is testing]]
             [clojure.string :refer [join split]]
-            [common.regex :as regex]))
+            [common.regex :as regex]
+            [goog.object]))
 
 
 ;; (deftest invert-terms-test
@@ -42,20 +43,35 @@
            "bipeds"    (->lines "werewolf gorgon dwarf")
            "tentacled" (->lines "kraken gorgon squid beholder")}))))
 
-(deftest ->regex-data-test
-  (is (= {:regex "(?<bipeds>dwarf)|(?<birds>emu)|(?<canines>fox)|(?<tentacled>squid)|(?<birds$$$monsters>roc)|(?<monsters$$$tentacled>beholder|kraken)|(?<bipeds$$$canines$$$monsters>werewolf)|(?<bipeds$$$monsters$$$tentacled>gorgon)"
-          :category-names ["bipeds"
-                           "birds"
-                           "canines"
-                           "tentacled"
-                           "birds$$$monsters"
-                           "monsters$$$tentacled"
-                           "bipeds$$$canines$$$monsters"
-                           "bipeds$$$monsters$$$tentacled"]}
-         (regex/->regex-data
+(deftest ->regex-str-test
+  (is (= "(?<bipeds>dwarf)|(?<birds>emu)|(?<canines>fox)|(?<tentacled>squid)|(?<birds$$$monsters>roc)|(?<monsters$$$tentacled>beholder|kraken)|(?<bipeds$$$canines$$$monsters>werewolf)|(?<bipeds$$$monsters$$$tentacled>gorgon)"
+         (regex/->regex-str
           {"monsters"  (->lines "roc werewolf kraken gorgon beholder")
            "canines"   (->lines "fox werewolf")
            "birds"     (->lines "emu roc")
            "bipeds"    (->lines "werewolf gorgon dwarf")
            "tentacled" (->lines "kraken gorgon squid beholder")}))))
+
+;; xregexp lib maintains a list of all capture-group names that lets
+;; us write less code. This property is undocumented, so back it up
+;; with a test in case it changes out from underneath us.
+(deftest xregexp-undocumented-captureNames-prop-test
+  (is (= ["bipeds"
+          "birds"
+          "canines"
+          "tentacled"
+          "birds$$$monsters"
+          "monsters$$$tentacled"
+          "bipeds$$$canines$$$monsters"
+          "bipeds$$$monsters$$$tentacled"]
+         (let [regex (regex/->regex
+                      {"monsters"  (->lines "roc werewolf kraken gorgon beholder")
+                       "canines"   (->lines "fox werewolf")
+                       "birds"     (->lines "emu roc")
+                       "bipeds"    (->lines "werewolf gorgon dwarf")
+                       "tentacled" (->lines "kraken gorgon squid beholder")})]
+           (js->clj
+            (goog.object/getValueByKeys regex
+                                        "xregexp"
+                                        "captureNames"))))))
 
