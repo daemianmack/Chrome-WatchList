@@ -22,3 +22,7 @@
                                 show-type
                                 #js {:acceptNode filter})]
     (take-while some? (repeatedly #(.nextNode walker)))))
+
+(defn add-class [node class] (.add    (.-classList node) class))
+(defn del-class [node class] (.remove (.-classList node) class))
+

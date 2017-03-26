@@ -134,18 +134,15 @@
 (def tab-handles  #{"terms" "blacklist" "styles"})
 (def tab-suffixes #{"-tab" "-form"})
 
-(defn add-class [node class] (.add    (.-classList node) class))
-(defn del-class [node class] (.remove (.-classList node) class))
-
 (defn assign-click-handlers! []
   (doseq [handle tab-handles]
     (set! (.-onclick (id->el (str handle "-tab")))
           (fn [e]
             (doseq [handle tab-handles
                     suffix tab-suffixes]
-              (del-class (id->el (str handle suffix)) "active"))
+              (dom/del-class (id->el (str handle suffix)) "active"))
             (doseq [suffix tab-suffixes]
-             (add-class (id->el (str handle suffix))  "active"))))))
+             (dom/add-class (id->el (str handle suffix))  "active"))))))
 
 (defn save-handlers! []
   (doseq [tab-handle #{"terms" "blacklist" "styles"}]

@@ -11,9 +11,6 @@
 (enable-console-print!)
 
 
-(defn add-class [node class] (.add    (.-classList node) class))
-(defn del-class [node class] (.remove (.-classList node) class))
-
 (defn evt [mod-fn node class]
   (fn [e]
     (mod-fn (.getDOMNode node) class)
@@ -51,7 +48,7 @@
   (let [categories (split category #"\$\$\$")
         node (.createDom goog.dom "mark" nil (mk-text-node match))]
     (doseq [class (sort (into ["watchlist-highlight"] categories))]
-      (add-class node class))
+      (dom/add-class node class))
     {:node node
      :term (lower-case match)
      :groups categories
@@ -132,6 +129,6 @@
   [node]
   (let [classes (replace (.-className node) #"\\s+watchlist-emphasized\\s+" "")]
     (js/setTimeout (fn [] (set! (.-className node) classes)) 500)
-    (add-class node "watchlist-emphasized"))
+    (dom/add-class node "watchlist-emphasized"))
   (set! (.-scrollTop (.querySelector js/document "body"))
         (reduce + 0 (map #(.-offsetTop %) (ancestors-of node)))))

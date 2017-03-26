@@ -2,6 +2,7 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [reagent.core :as reagent]
             [goog.dom]
+            [common.dom :as dom]
             [watchlist.nodes :as nodes]
             [re-frame.core :refer [register-handler
                                    register-sub
@@ -42,10 +43,10 @@
   (let [this (reagent/current-component)]
     [:span {:class (apply str "watchlist-status-bar-item "
                           (-> hits first :groups))
-            :on-mouse-over (nodes/evt nodes/add-class this "watchlist-item-hover")
-            :on-mouse-out  (nodes/evt nodes/del-class this "watchlist-item-hover")
-            :on-mouse-down (nodes/evt nodes/add-class this "watchlist-item-click")
-            :on-mouse-up   (nodes/evt nodes/del-class this "watchlist-item-click")
+            :on-mouse-over (nodes/evt dom/add-class this "watchlist-item-hover")
+            :on-mouse-out  (nodes/evt dom/del-class this "watchlist-item-hover")
+            :on-mouse-down (nodes/evt dom/add-class this "watchlist-item-click")
+            :on-mouse-up   (nodes/evt dom/del-class this "watchlist-item-click")
             :on-click      #(dispatch [:clicked group-term])
             :title         (str (- (.getTime (js/Date.)) started) " ms elapsed")}
      group-term
