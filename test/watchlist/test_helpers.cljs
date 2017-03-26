@@ -3,6 +3,7 @@
             [clojure.string  :refer [replace join split]]
             [cljs.pprint     :refer [pprint cl-format]]
             [common.regex    :as regex]
+            [common.dom      :as dom]
             [watchlist.nodes :refer [highlight-matches!]]
             [hipo.core       :as hipo]
             [instaparse.core :as insta]))
@@ -24,28 +25,24 @@
     (.removeChild js/document.body sandbox)))
 
 
-(defn node-seq [root filter-fn]
-  (let [walker (.createTreeWalker js/document
-                                  root
-                                  NodeFilter.SHOW_ELEMENT
-                                  filter-fn)]
-    (take-while some? (repeatedly #(.nextNode walker)))))
+(defn node-seq [root filter]
+  (dom/node-seq {:root root :filter filter}))
 
 (defn children-of-id [id & [tag-filter]]
   (node-seq (.getElementById js/document id)
-            #js {:acceptNode (fn [node]
-                               (if (nil? tag-filter)
-                                 NodeFilter.FILTER_ACCEPT
-                                 (if (= tag-filter (.toLowerCase (.-tagName node)))
-                                   NodeFilter.FILTER_ACCEPT
-                                   NodeFilter.FILTER_SKIP)))}))
+            (fn [node]
+               (if (nil? tag-filter)
+                 NodeFilter.FILTER_ACCEPT
+                 (if (= tag-filter (.toLowerCase (.-tagName node)))
+                   NodeFilter.FILTER_ACCEPT
+                   NodeFilter.FILTER_SKIP)))))
 
 (defn children-of-node [node & [tag-filter]]
   (node-seq node
-            #js {:acceptNode (fn [node]
-                               (if (= tag-filter (.toLowerCase (.-tagName node)))
-                                 NodeFilter.FILTER_ACCEPT
-                                 NodeFilter.FILTER_SKIP))}))
+            (fn [node]
+              (if (= tag-filter (.toLowerCase (.-tagName node)))
+                NodeFilter.FILTER_ACCEPT
+                NodeFilter.FILTER_SKIP))))
 
 (defn marks [nodes]
   (children-of-node (.getElementById js/document "body")

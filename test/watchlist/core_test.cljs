@@ -1,6 +1,7 @@
 (ns watchlist.core-test
   (:require [cljs.test :refer-macros [deftest is testing use-fixtures]]
             [common.regex :as regex]
+            [common.dom :as dom]
             [watchlist.core :as core]
             [watchlist.nodes :as nodes]
             [watchlist.test-helpers :as th]))
@@ -13,18 +14,15 @@
 
 
 
-(defn mk-tree [txt]
-  (.createDom goog.dom "div" (clj->js {:id "foo"})
-              (.createTextNode js/document txt)))
-
-(defn walk-tree [root]
-  (let [tree (.createTreeWalker js/document
-                                root
-                                NodeFilter.SHOW_TEXT)]
-    (take-while some? (repeatedly #(.nextNode tree)))))
+(defn mk-tree
+  ([txt] (mk-tree {:id "foo"} txt))
+  ([root-attrs txt]
+   (.createDom goog.dom "div" (clj->js root-attrs)
+               (.createTextNode js/document txt))))
 
 (defn mark-matches [regex tree]
-  (nodes/mark-matches regex (first (walk-tree tree))))
+  (nodes/mark-matches regex
+                      (first (dom/node-seq {:root tree :show :text}))))
 
 (defn terms-marked [tree-fn terms]
    (map :term (mark-matches (regex/->regex terms) (tree-fn))))

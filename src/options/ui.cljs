@@ -1,5 +1,6 @@
 (ns options.ui
   (:require [common.regex :as regex]
+            [common.dom :as dom]
             [clojure.string :refer [split join replace upper-case]]
             [cljs.pprint :refer [pprint]]))
 
@@ -49,12 +50,8 @@
                                         (.-type node))
                              (not (empty? (.-value node))))
                       NodeFilter.FILTER_ACCEPT
-                      NodeFilter.FILTER_SKIP))
-        walker (.createTreeWalker js/document
-                                  root
-                                  NodeFilter.SHOW_ELEMENT
-                                  #js {:acceptNode filter-fn})]
-    (->> (take-while some? (repeatedly #(.nextNode walker)))
+                      NodeFilter.FILTER_SKIP))]
+    (->> (dom/node-seq {:root root :filter filter-fn})
          (map #(.-value %))
          (partition-all 2))))
 
@@ -83,11 +80,8 @@
 
 (defn clone-template-for! [template category]
   (let [new-set (doto (.cloneNode template true)
-                  (#(set! (.-id %) (str "terms-" category))))
-        walker  (.createTreeWalker js/document
-                                   new-set
-                                   NodeFilter.SHOW_ELEMENT)]
-    (doseq [el (take-while some? (repeatedly #(.nextNode walker)))]
+                  (#(set! (.-id %) (str "terms-" category))))]
+    (doseq [el (dom/node-seq {:root new-set})]
       (set! (.-id el) (str (.-id el) "-" category)))
     new-set))
 

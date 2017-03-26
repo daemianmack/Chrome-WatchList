@@ -20,10 +20,7 @@
     (.preventDefault e)))
 
 (defn text-objs []
-  (let [tree (.createTreeWalker js/document
-                                (.-body js/document)
-                                NodeFilter.SHOW_TEXT)]
-    (take-while some? (repeatedly #(.nextNode tree)))))
+  (dom/node-seq {:show :text}))
 
 (defn mk-text-node [text] (.createTextNode js/document text))
 
