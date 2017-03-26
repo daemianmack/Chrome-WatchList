@@ -6,12 +6,12 @@
 
 (enable-console-print!)
 
-(defn to-regex [s]
+(defn to-simple-regex [s]
   (->> (split s #"\n")
        (filter not-empty)
        (join "|")))
 
-(defn to-text [s]
+(defn from-simple-regex [s]
   (->> (split s #"\|")
        (join "\n")))
 
@@ -65,7 +65,7 @@
   (save-options-and-flash tab-handle (-> (str tab-handle "-input")
                                          id->el
                                          .-value
-                                         to-regex)))
+                                         to-simple-regex)))
 
 (defmethod save-options! "styles" [tab-handle]
   (save-options-and-flash tab-handle
@@ -88,20 +88,20 @@
 (defn clone-terms-template!
   ([] (clone-terms-template! (gensym) ""))
   ([category terms]
-   (let [terms    (to-text terms)
+   (let [terms    (from-simple-regex terms)
          template (id->el "terms-template")
          new-set  (clone-template-for! template category)]
      (.insertBefore (.-parentNode template) new-set (id->el "terms-controls"))
      (when (not-empty terms)
        (set-val!  (str "terms-input-category-" category) category)
-       (set-html! (str "terms-input-terms-" category)    (to-text terms))))))
+       (set-html! (str "terms-input-terms-" category)    (from-simple-regex terms))))))
 
 (defmethod fill-in-options! "terms" [_ term-data]
   (doseq [[category terms] (sort term-data)]
     (clone-terms-template! category terms)))
 
 (defmethod fill-in-options! "blacklist" [_ blacklist]
-  (when blacklist (set-val! "blacklist-input" (to-text blacklist))))
+  (when blacklist (set-val! "blacklist-input" (from-simple-regex blacklist))))
 
 (defmethod fill-in-options! "styles" [_ styles]
   (when styles (set-val! "styles-input" styles)))
