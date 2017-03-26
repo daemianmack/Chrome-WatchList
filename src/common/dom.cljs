@@ -1,4 +1,5 @@
-(ns common.dom)
+(ns common.dom
+  (:require [goog.dom]))
 
 (defn to-s [x]
   (if (.-outerHTML x)
@@ -26,3 +27,11 @@
 (defn add-class [node class] (.add    (.-classList node) class))
 (defn del-class [node class] (.remove (.-classList node) class))
 
+(defn mk-el
+  ([tag-name attrs]
+   (.createDom goog.dom tag-name (clj->js attrs)))
+  ([tag-name attrs children]
+   (.createDom goog.dom tag-name (clj->js attrs) children)))
+
+(defn mk-txt [txt]
+  (.createTextNode js/document txt))
