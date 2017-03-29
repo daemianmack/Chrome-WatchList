@@ -17,7 +17,8 @@
 (defn mk-tree
   ([txt] (mk-tree {:id "foo"} txt))
   ([root-attrs txt]
-   (dom/mk-el "div" root-attrs (dom/mk-txt txt))))
+   (dom/mk-el "div" root-attrs
+              (.createTextNode js/document txt))))
 
 (defn mark-matches [regex tree]
   (nodes/mark-matches regex

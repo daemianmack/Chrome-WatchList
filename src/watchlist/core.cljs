@@ -1,6 +1,7 @@
 (ns watchlist.core
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [reagent.core :as reagent]
+            [goog.dom]
             [common.dom :as dom]
             [watchlist.nodes :as nodes]
             [re-frame.core :refer [register-handler
@@ -73,8 +74,9 @@
       (dispatch [:started])
       (dispatch [:initialize options])
       (when (not-empty styles)
-        (let [style (dom/mk-el "style" {"type" "text/css"} styles)]
+        (let [style (.createDom goog.dom "style" {"type" "text/css"} styles)]
           (.appendChild (.querySelector js/document "body") style)))
-      (let [app-root (dom/mk-el "div" {"className" "watchlist-wrapper"})]
+      (let [attrs (clj->js {"className" "watchlist-wrapper"})
+            app-root (.createDom goog.dom "div" attrs)]
         (.appendChild (.querySelector js/document "body") app-root)
         (reagent/render [statusbar] app-root)))))
