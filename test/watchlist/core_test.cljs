@@ -17,8 +17,8 @@
 (defn mk-tree
   ([txt] (mk-tree {:id "foo"} txt))
   ([root-attrs txt]
-   (dom/mk-el "div" root-attrs
-              (.createTextNode js/document txt))))
+   (.createDom goog.dom "div" (clj->js root-attrs)
+               (.createTextNode js/document txt))))
 
 (defn mark-matches [regex tree]
   (nodes/mark-matches regex

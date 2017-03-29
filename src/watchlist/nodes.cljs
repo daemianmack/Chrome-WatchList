@@ -46,7 +46,7 @@
 (defn mk-node
   [category match]
   (let [categories (split category #"\$\$\$")
-        node (dom/mk-el "mark" nil (mk-text-node match))]
+        node (.createDom goog.dom "mark" nil (mk-text-node match))]
     (doseq [class (sort (into ["watchlist-highlight"] categories))]
       (dom/add-class node class))
     {:node node
