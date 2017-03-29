@@ -26,8 +26,7 @@
                                     :pretty-print          true
                                     :cache-analysis        true
                                     :source-map            "target/unpacked/watchlist.js.map"
-                                    :source-map-timestamp  true
-                                    :resource-paths ["resources"]}}
+                                    :source-map-timestamp  true}}
 
                :options {:source-paths ["src/common" "src/options"]
                          :compiler     {:output-to             "target/unpacked/options.js"
@@ -40,30 +39,26 @@
                                         :pretty-print          true
                                         :cache-analysis        true
                                         :source-map            "target/unpacked/options.js.map"
-                                        :source-map-timestamp  true
-                                        :resource-paths ["resources"]}}
+                                        :source-map-timestamp  true}}
 
                :options-prod {:source-paths ["src/common" "src/options"]
                               :compiler     {:output-to     "target/options-prod/options.js"
                                              :output-dir    "target/options-prod/options"
                                              :optimizations :advanced
-                                             :externs       ["resources/externs.js"]
-                                             :resource-paths ["resources"]}}
+                                             :externs       ["resources/externs.js"]}}
 
                :test {:source-paths ["src/common" "src/watchlist" "test"]
                       :compiler     {:output-to     "target/test/watchlist.js"
                                      :output-dir    "target/test/watchlist"
                                      :optimizations :whitespace
-                                     :externs       ["resources/externs.js"]
-                                     :resource-paths ["resources"]}
+                                     :externs       ["resources/externs.js"]}
                       :notify-command ["phantomjs" "phantom/runner.js" "resources/testing/index.html"]}
 
                :prod {:source-paths ["src/common" "src/watchlist" "src/extension"]
                       :compiler     {:output-to     "target/prod/watchlist.js"
                                      :output-dir    "target/prod/watchlist"
                                      :optimizations :advanced
-                                     :externs       ["resources/externs.js"]
-                                     :resource-paths ["resources"]}}}}
+                                     :externs       ["resources/externs.js"]}}}}
 
   :chromebuild {:resource-paths ["resources/assets"]
                 :target-path "target/unpacked"}
