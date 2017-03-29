@@ -96,12 +96,13 @@
     (swap-in-nodes! node new-node-descs)
     (filter :html new-node-descs)))
 
-
 (defn swap-in-nodes!
   [old-node new-nodes]
-  (let [parent (.-parentNode old-node)]
+  (let [parent (.-parentNode old-node)
+        frag (.createDocumentFragment js/document)]
     (doseq [new-node new-nodes]
-      (.insertBefore parent (:node new-node) old-node))
+      (.appendChild frag (:node new-node)))
+    (.insertBefore parent frag old-node)
     (.removeChild parent old-node)))
 
 (defn ^boolean parent-is-visible?
