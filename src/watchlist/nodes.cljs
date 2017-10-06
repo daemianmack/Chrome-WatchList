@@ -145,5 +145,5 @@
   (let [classes (replace (.-className node) #"\\s+watchlist-emphasized\\s+" "")]
     (js/setTimeout (fn [] (set! (.-className node) classes)) 500)
     (dom/add-class node "watchlist-emphasized"))
-  (set! (.-scrollTop (.querySelector js/document "body"))
+  (set! (.-scrollTop (.-scrollingElement js/document))
         (reduce + 0 (map #(.-offsetTop %) (ancestors-of node)))))
