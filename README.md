@@ -68,5 +68,3 @@ that can be chosen at test runtime via an env var...
 
 Allow control over regex flags; I want case-insensitive, so
 that's what you get for now.
-
-Allow grouping of regexes with distinct CSS rules for each group.
