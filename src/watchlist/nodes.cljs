@@ -57,9 +57,9 @@
 (declare swap-in-nodes!)
 
 (defn get-category-names' [regex]
-  (js->clj (goog.object/getValueByKeys regex
-                                       "xregexp"
-                                       "captureNames")))
+  (goog.object/getValueByKeys regex
+                              "xregexp"
+                              "captureNames"))
 
 (def get-category-names (memoize get-category-names'))
 
