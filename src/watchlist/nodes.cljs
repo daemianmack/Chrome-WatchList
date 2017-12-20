@@ -129,8 +129,23 @@
          (parent-can-contain-markup? parent)
          (parent-is-visible? parent))))
 
+(defn remove-watchlist-mark [node]
+  (set! (.-outerHTML node) (.-textContent node)))
+
+(defn ^boolean is-watchlist-mark?
+  [node]
+  (and (= "MARK"  (.-tagName node))
+       (.contains (.-classList node) "watchlist-highlight")))
+
+(extend-type js/HTMLCollection
+  ISeqable
+  (-seq [array] (array-seq array 0)))
+
 (defn highlight-matches!
   [regex-str]
+  (doseq [old-mark (filter is-watchlist-mark?
+                           (.getElementsByTagName js/document "mark"))]
+    (remove-watchlist-mark old-mark))
   (let [regex-map (regex/regexify regex-str)
         matching-texts (filterv (partial qualifying-node regex-map) (text-objs))
         new-nodes (reduce #(into %1 (mark-matches regex-map %2)) [] matching-texts)]

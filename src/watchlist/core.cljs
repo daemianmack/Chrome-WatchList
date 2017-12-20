@@ -1,6 +1,7 @@
 (ns watchlist.core
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [reagent.core :as reagent]
+            [re-frame.db :refer [app-db]]
             [goog.dom]
             [common.dom :as dom]
             [watchlist.nodes :as nodes]
@@ -67,6 +68,8 @@
     (/ dmin-v dmax-v)))
 
 (defn draw-scroll-bar [matches]
+  (when-let [old-scroll-bar (.querySelector js/document "#watchlist-scroll-bar")]
+    (.removeChild (.-parentElement old-scroll-bar) old-scroll-bar))
   (let [scroll-bar (.createDom goog.dom "canvas" #js {"id" "watchlist-scroll-bar"})]
     (set! (.-width scroll-bar) 16)
     (set! (.-height scroll-bar) (.-clientHeight (.querySelector js/document "body")))
@@ -84,32 +87,68 @@
           (set! (.-fillStyle ctx) node-bgcolor)
           (.fillRect ctx 0.5 (+ start-y 0.5) (- width 1) 3))))))
 
-(defn statusbar []
+(defn statusbar [styles]
   (let [matches (subscribe [:matches])
         started (subscribe [:started])]
     (fn []
       (when (not-empty @matches)
         (draw-scroll-bar @matches)
         [:div {:id "watchlist-status-bar" :class "watchlist-emphasized"}
+         (when styles
+           [:style {:type "text/css"} styles])
          [:span {:class "watchlist-status-bar-item" :id "watchlist-title"} "Watchlist"]
          (doall
           (for [[group-term hits] (sort-by key (group-by :term @matches))]
             ^{:key group-term} [display-match group-term hits @started]))]))))
+
+(declare observer)
+
+(defn go [{:keys [styles] :as options}]
+  ;; The need to redraw the page on subsequent changes adds
+  ;; complexity. Observing while redrawing means potentially
+  ;; triggering changes due to our own changes. Races within/around
+  ;; re-frame require more ad-hoc coordination than pleasant --
+  ;; removing previous matches from DB (so we don't do an early draw
+  ;; of statusbar with old matches).
+  (.disconnect @observer)
+  (dispatch [:started])
+  (swap! app-db dissoc :matches)
+  (dispatch [:initialize options])
+  (when-let [old-wrapper (.querySelector js/document "#watchlist-wrapper")]
+    (reagent/unmount-component-at-node (.querySelector js/document "#watchlist-status-root"))
+    (.removeChild (.-parentElement old-wrapper) old-wrapper))
+  ;; Style must be written outside of render call so that it's available to blip bar.
+  (let [style    (.createDom goog.dom "style" #js {:type "text/css"} styles)
+        app-root (.createDom goog.dom "div" #js {:id "watchlist-status-root"})
+        wrapper  (.createDom goog.dom
+                             "div"
+                             #js {:id "watchlist-wrapper"}
+                             style app-root)]
+    (.appendChild (.querySelector js/document "body") wrapper)
+    (reagent/render [statusbar styles] app-root)
+    (.observe @observer
+              (.querySelector js/document "body")
+              #js {:childList true
+                   :attributes true
+                   :characterData true
+                   :subtree true})))
+
+(def ratio (atom nil))
+(def observer (atom nil))
 
 (defn url-allowed? [blacklist]
   (not (and (not (empty? blacklist))
             (re-find (re-pattern blacklist)
                      (.-URL js/document)))))
 
-(defn ^:export init! [options]
-  (let [{:keys [terms blacklist styles]} options]
-    (when (and terms (url-allowed? blacklist))
-      (dispatch [:started])
-      (dispatch [:initialize options])
-      (when (not-empty styles)
-        (let [style (.createDom goog.dom "style" {"type" "text/css"} styles)]
-          (.appendChild (.querySelector js/document "body") style)))
-      (let [attrs (clj->js {"className" "watchlist-wrapper"})
-            app-root (.createDom goog.dom "div" attrs)]
-        (.appendChild (.querySelector js/document "body") app-root)
-        (reagent/render [statusbar] app-root)))))
+(defn ^:export init! [{:keys [terms blacklist styles] :as options}]
+  (when (and terms (url-allowed? blacklist))
+    ;; Observe mutations so we can re-draw if the page changes.
+    (reset! ratio (viewport-height-ratio))
+    (reset! observer (js/window.MutationObserver.
+                      (fn [mutation-list observer]
+                        (let [ratio' (viewport-height-ratio)]
+                          (if (not= ratio' @ratio)
+                            (do (reset! ratio ratio')
+                                (go options)))))))
+    (go options)))
