@@ -7,7 +7,7 @@
   color: black;
   position: fixed;
   bottom: 0;
-  right: 0;
+  right: 16px;
   z-index: 25000;
   background-color: #ebebeb;
   -webkit-border-top-left-radius: 2px;
@@ -64,4 +64,13 @@
   -webkit-animation-duration: 500ms;
   -webkit-animation-iteration-count: 1;
   -webkit-animation-timing-function: linear;
+}
+
+#watchlist-scroll-bar {
+  border-left: 1px solid silver;
+  background-color: #ebebeb;
+  position: fixed;
+  top: 0px;
+  bottom: 0px;
+  right: 0;
 }

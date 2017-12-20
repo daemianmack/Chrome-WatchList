@@ -52,11 +52,44 @@
      group-term
      [:span {:class "watchlist-status-bar-count"} (count hits)]]))
 
+(defn viewport-height-ratio []
+  ;; buh
+  ;; https://github.com/jquery/jquery/blob/d71f6a53927ad02d728503385d15539b73d21ac8/src/dimensions.js#L23-L29
+  (let [data {:doc-client-height (.. js/window -document -documentElement -clientHeight)
+              :doc-offset-height (.. js/window -document -documentElement -offsetHeight)
+              :doc-scroll-height (.. js/window -document -documentElement -scrollHeight)
+              :bod-client-height (.-clientHeight (.querySelector js/document "body"))
+              :bod-offset-height (.-offsetHeight (.querySelector js/document "body"))
+              :bod-scroll-height (.-scrollHeight (.querySelector js/document "body"))}
+        sorted (sort-by (fn [[k v]] v) data)
+        [dmin-k dmin-v] (first sorted)
+        [dmax-k dmax-v] (last sorted)]
+    (/ dmin-v dmax-v)))
+
+(defn draw-scroll-bar [matches]
+  (let [scroll-bar (.createDom goog.dom "canvas" #js {"id" "watchlist-scroll-bar"})]
+    (set! (.-width scroll-bar) 16)
+    (set! (.-height scroll-bar) (.-clientHeight (.querySelector js/document "body")))
+    (.appendChild (.querySelector js/document "body") scroll-bar)
+    (let [ratio (viewport-height-ratio)
+          scroll-y (.-scrollY js/window)
+          width (.-clientWidth scroll-bar)
+          ctx (.getContext scroll-bar "2d")]
+      (doseq [{node :node} matches]
+        (let [node-top (.-top (.getBoundingClientRect node))
+              node-bgcolor (.getPropertyValue (.getComputedStyle js/window node) "background-color")
+              start-y (.round js/Math (* (+ node-top scroll-y) ratio))]
+          (set! (.-fillStyle ctx) "#999")
+          (.fillRect ctx 0 start-y width 4)
+          (set! (.-fillStyle ctx) node-bgcolor)
+          (.fillRect ctx 0.5 (+ start-y 0.5) (- width 1) 3))))))
+
 (defn statusbar []
   (let [matches (subscribe [:matches])
         started (subscribe [:started])]
     (fn []
       (when (not-empty @matches)
+        (draw-scroll-bar @matches)
         [:div {:id "watchlist-status-bar" :class "watchlist-emphasized"}
          [:span {:class "watchlist-status-bar-item" :id "watchlist-title"} "Watchlist"]
          (doall
