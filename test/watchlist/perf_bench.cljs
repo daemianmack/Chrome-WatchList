@@ -9,6 +9,10 @@
             [hipo.core :as hipo]
             [watchlist.perf-data :as pd]))
 
+(extend-type js/NodeList
+  ISeqable
+  (-seq [array] (array-seq array 0)))
+
 (def word-pool (take 100 (shuffle pd/words)))
 (def word-cycler (cycle word-pool))
 (defn next-n-strs
