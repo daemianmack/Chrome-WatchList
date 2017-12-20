@@ -145,5 +145,6 @@
   (let [classes (replace (.-className node) #"\\s+watchlist-emphasized\\s+" "")]
     (js/setTimeout (fn [] (set! (.-className node) classes)) 500)
     (dom/add-class node "watchlist-emphasized"))
-  (set! (.-scrollTop (.-scrollingElement js/document))
-        (reduce + 0 (map #(.-offsetTop %) (ancestors-of node)))))
+  ;; Overspecify options to clobber default `alignToTop` option, which
+  ;; either places item at the top (wrong) or bottom (also wrong).
+  (.scrollIntoView node #js {:block "center" :inline "center"}))
