@@ -66,7 +66,7 @@
   -webkit-animation-timing-function: linear;
 }
 
-#watchlist-scroll-bar {
+#watchlist-blip-bar {
   border-left: 1px solid silver;
   background-color: #ebebeb;
   position: fixed;

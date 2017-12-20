@@ -67,17 +67,17 @@
         [dmax-k dmax-v] (last sorted)]
     (/ dmin-v dmax-v)))
 
-(defn draw-scroll-bar [matches]
-  (when-let [old-scroll-bar (.querySelector js/document "#watchlist-scroll-bar")]
-    (.removeChild (.-parentElement old-scroll-bar) old-scroll-bar))
-  (let [scroll-bar (.createDom goog.dom "canvas" #js {"id" "watchlist-scroll-bar"})]
-    (set! (.-width scroll-bar) 16)
-    (set! (.-height scroll-bar) (.-clientHeight (.querySelector js/document "body")))
-    (.appendChild (.querySelector js/document "body") scroll-bar)
+(defn draw-blip-bar [matches]
+  (when-let [old-blip-bar (.querySelector js/document "#watchlist-blip-bar")]
+    (.removeChild (.-parentElement old-blip-bar) old-blip-bar))
+  (let [blip-bar (.createDom goog.dom "canvas" #js {"id" "watchlist-blip-bar"})]
+    (set! (.-width blip-bar) 16)
+    (set! (.-height blip-bar) (.-clientHeight (.querySelector js/document "body")))
+    (.appendChild (.querySelector js/document "body") blip-bar)
     (let [ratio (viewport-height-ratio)
           scroll-y (.-scrollY js/window)
-          width (.-clientWidth scroll-bar)
-          ctx (.getContext scroll-bar "2d")]
+          width (.-clientWidth blip-bar)
+          ctx (.getContext blip-bar "2d")]
       (doseq [{node :node} matches]
         (let [node-top (.-top (.getBoundingClientRect node))
               node-bgcolor (.getPropertyValue (.getComputedStyle js/window node) "background-color")
@@ -92,7 +92,7 @@
         started (subscribe [:started])]
     (fn []
       (when (not-empty @matches)
-        (draw-scroll-bar @matches)
+        (draw-blip-bar @matches)
         [:div {:id "watchlist-status-bar" :class "watchlist-emphasized"}
          (when styles
            [:style {:type "text/css"} styles])
