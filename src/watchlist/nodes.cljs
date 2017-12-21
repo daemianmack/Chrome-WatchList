@@ -11,9 +11,9 @@
 (enable-console-print!)
 
 
-(defn evt [mod-fn node class]
+(defn evt [mod-fn class]
   (fn [e]
-    (mod-fn (.getDOMNode node) class)
+    (mod-fn (.-target e) class)
     (.preventDefault e)))
 
 (defn text-objs []
