@@ -56,23 +56,38 @@
 (defn viewport-height-ratio []
   ;; buh
   ;; https://github.com/jquery/jquery/blob/d71f6a53927ad02d728503385d15539b73d21ac8/src/dimensions.js#L23-L29
-  (let [data {:doc-client-height (.. js/window -document -documentElement -clientHeight)
-              :doc-offset-height (.. js/window -document -documentElement -offsetHeight)
-              :doc-scroll-height (.. js/window -document -documentElement -scrollHeight)
-              :bod-client-height (.-clientHeight (.querySelector js/document "body"))
-              :bod-offset-height (.-offsetHeight (.querySelector js/document "body"))
-              :bod-scroll-height (.-scrollHeight (.querySelector js/document "body"))}
-        sorted (sort-by (fn [[k v]] v) data)
+  (let [coords {:doc-client-height (.. js/window -document -documentElement -clientHeight)
+                :doc-offset-height (.. js/window -document -documentElement -offsetHeight)
+                :doc-scroll-height (.. js/window -document -documentElement -scrollHeight)
+                :bod-client-height (.-clientHeight (.querySelector js/document "body"))
+                :bod-offset-height (.-offsetHeight (.querySelector js/document "body"))
+                :bod-scroll-height (.-scrollHeight (.querySelector js/document "body"))}
+        ;; Some coordinates can be zero?
+        dims (remove #(zero? (val %)) coords)
+        sorted (sort-by val dims)
         [dmin-k dmin-v] (first sorted)
         [dmax-k dmax-v] (last sorted)]
     (/ dmin-v dmax-v)))
+
+;; The only site that seems to need this...
+;; https://www.justinobeirne.com/google-maps-moat
+;; is somehow blocking all canvas rendering anyway.
+;; Consider nixing.
+(defn doc-height []
+  (let [ch (.-clientHeight (.querySelector js/document "body"))
+        dh (.. js/window -document -documentElement -clientHeight)]
+    (cond
+      (pos? ch) ch
+      (pos? dh) dh
+      :else (js/alert "blip-bar unable to find non-zero document-height or client-document-height"))))
 
 (defn draw-blip-bar [matches]
   (when-let [old-blip-bar (.querySelector js/document "#watchlist-blip-bar")]
     (.removeChild (.-parentElement old-blip-bar) old-blip-bar))
   (let [blip-bar (.createDom goog.dom "canvas" #js {"id" "watchlist-blip-bar"})]
+    (js/console.log blip-bar)
     (set! (.-width blip-bar) 16)
-    (set! (.-height blip-bar) (.-clientHeight (.querySelector js/document "body")))
+    (set! (.-height blip-bar) (doc-height))
     (.appendChild (.querySelector js/document "body") blip-bar)
     (let [ratio (viewport-height-ratio)
           scroll-y (.-scrollY js/window)
