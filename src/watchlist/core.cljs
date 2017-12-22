@@ -1,5 +1,7 @@
 (ns watchlist.core
-  (:require [goog.dom]
+  (:require [clojure.core.async :as a]
+            [goog.dom]
+            [common.regex :as regex]
             [hipo.core :as hipo]
             [common.dom :as dom]
             [watchlist.nodes :as nodes]))
@@ -62,8 +64,6 @@
       :else (js/alert "blip-bar unable to find non-zero document-height or client-document-height"))))
 
 (defn draw-blip-bar [matches]
-  (when-let [old-blip-bar (.querySelector js/document "#watchlist-blip-bar")]
-    (.removeChild (.-parentElement old-blip-bar) old-blip-bar))
   (let [blip-bar (.createDom goog.dom "canvas" #js {"id" "watchlist-blip-bar"})]
     (set! (.-width blip-bar) 16)
     (set! (.-height blip-bar) (doc-height))
@@ -98,8 +98,11 @@
 
 (defn go [{:keys [styles] :as options}]
   ;; Accommodate fact that we may be re-drawing elements if the page has changed.
+  (prn :go=====================)
   (.disconnect @observer)
   (let [started (.getTime (js/Date.))]
+    (when-let [old-blip-bar (.querySelector js/document "#watchlist-blip-bar")]
+      (.removeChild (.-parentElement old-blip-bar) old-blip-bar))
     (when-let [old-wrapper (.querySelector js/document "#watchlist-wrapper")]
       (.removeChild (.-parentElement old-wrapper) old-wrapper))
     (let [matches (nodes/highlight-matches! (:parsed options))]
@@ -121,6 +124,7 @@
 
 (def ratio (atom nil))
 (def observer (atom nil))
+(def pending-reloads (atom nil))
 
 (defn url-allowed? [blacklist]
   (not (and (not (empty? blacklist))
@@ -129,12 +133,19 @@
 
 (defn ^:export init! [{:keys [terms blacklist styles] :as options}]
   (when (and terms (url-allowed? blacklist))
-    ;; Observe mutations so we can re-draw if the page changes.
+    ;; Observe mutations so we can re-draw if the page changes height.
+    ;; Ignoring case where new matchable nodes enter page without
+    ;; changing height, with the assumption that that's a rare case,
+    ;; in favor of minimizing re-draws.
     (reset! ratio (viewport-height-ratio))
     (reset! observer (js/window.MutationObserver.
                       (fn [mutation-list observer]
-                        (let [ratio' (viewport-height-ratio)]
-                          (if (not= ratio' @ratio)
+                        (let [ratio' (viewport-height-ratio)
+                              this-id (random-uuid)]
+                          (when (not= ratio' @ratio)
                             (do (reset! ratio ratio')
-                                (go options)))))))
+                                (reset! pending-reloads this-id)
+                                (a/go (a/<! (a/timeout 200))
+                                      (when (compare-and-set! pending-reloads this-id nil)
+                                        (go options)))))))))
     (go options)))

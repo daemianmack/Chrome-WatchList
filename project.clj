@@ -1,6 +1,7 @@
 (defproject watchlist "0.6.0"
   :dependencies [[org.clojure/clojure "1.9.0-alpha15"]
                  [org.clojure/clojurescript "1.9.494"]
+                 [org.clojure/core.async "0.3.465"]
                  [com.lucasbradstreet/instaparse-cljs "1.4.1.2"]
                  [hipo "0.5.2"]
                  [cljsjs/xregexp "3.1.1-0"]]
