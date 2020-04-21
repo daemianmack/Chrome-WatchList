@@ -137,6 +137,8 @@
   (and (= "MARK"  (.-tagName node))
        (.contains (.-classList node) "watchlist-highlight")))
 
+;; HTMLCollection is slow and mutable. Using this might be a problem.
+;; Can we exchange it for a NodeList?
 (extend-type js/HTMLCollection
   ISeqable
   (-seq [array] (array-seq array 0)))
